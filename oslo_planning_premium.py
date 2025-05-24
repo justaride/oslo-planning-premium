@@ -32,6 +32,13 @@ try:
 except ImportError:
     ENHANCEMENTS_AVAILABLE = False
 
+# Import AI Planning System
+try:
+    from oslo_ai_planning_system import OsloAIPlanningSystem, render_ai_planning_interface
+    AI_SYSTEM_AVAILABLE = True
+except ImportError:
+    AI_SYSTEM_AVAILABLE = False
+
 # Professional color palette
 OSLO_COLORS = {
     'primary': '#1B4F72',      # Oslo blue
@@ -1076,6 +1083,7 @@ def create_premium_app():
             "📁 Document Categories": "Browse by category",
             "🔍 Smart Search": "Advanced document search",
             "📈 Advanced Analytics": "Deep data analysis",
+            "🤖 AI Planning System": "AI-powered planning intelligence",
             "✅ System Verification": "Quality control",
             "⚙️ Administration": "System management"
         }
@@ -1128,6 +1136,11 @@ def create_premium_app():
         render_smart_search()
     elif page == "📈 Advanced Analytics":
         render_analytics_premium()
+    elif page == "🤖 AI Planning System":
+        if AI_SYSTEM_AVAILABLE:
+            render_ai_planning_interface()
+        else:
+            st.error("❌ AI Planning System not available. Please ensure oslo_ai_planning_system.py is installed.")
     elif page == "✅ System Verification":
         render_verification_premium()
     elif page == "⚙️ Administration":
