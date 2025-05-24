@@ -185,7 +185,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Overordnet plan',
                 'document_type': 'Kommuneplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/kommuneplan/',
+                'url': 'https://www.oslo.kommune.no/politikk/kommuneplan/',
                 'description': 'Overordnet plan som viser hovedtrekkene i den fysiske, miljømessige, sosiale og kulturelle utviklingen i Oslo frem til 2035.',
                 'responsible_department': 'Plan- og bygningsetaten',
                 'date_published': '2020-06-17',
@@ -198,7 +198,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Arealdel',
                 'document_type': 'Arealdel',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/kommuneplan/arealdel/',
+                'url': 'https://www.oslo.kommune.no/politikk/kommuneplan/',
                 'description': 'Juridisk bindende arealdel som styrer arealbruken i Oslo og danner grunnlag for detaljerte reguleringsplaner.',
                 'responsible_department': 'Plan- og bygningsetaten',
                 'date_published': '2020-06-17',
@@ -211,7 +211,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Klima og energi',
                 'document_type': 'Kommunedelplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/planlegging/kommunedelplaner/klima-og-energi/',
+                'url': 'https://www.oslo.kommune.no/miljo-og-klima/',
                 'description': 'Strategisk plan for klimatiltak og energiomstilling med mål om klimanøytralitet innen 2030.',
                 'responsible_department': 'Klima- og energietaten',
                 'date_published': '2020-09-23',
@@ -226,7 +226,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Fjordbyen',
                 'document_type': 'Utviklingsstrategi',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/planlegging/fjordbyen/',
+                'url': 'https://www.oslo.kommune.no/byutvikling/',
                 'description': 'Omfattende utviklingsstrategi for Oslos sjøfront fra Frognerkilen til Bekkelaget, med fokus på bærekraftig byutvikling.',
                 'responsible_department': 'Plan- og bygningsetaten',
                 'date_published': '2008-05-21',
@@ -239,7 +239,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Hovinbyen',
                 'document_type': 'Områderegulering',
                 'status': 'Under behandling',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/planlegging/hovinbyen/',
+                'url': 'https://www.oslo.kommune.no/byutvikling/',
                 'description': 'Planlegging av ny bydel på Grorud med bolig, næring og grøntområder, knyttet til ny T-banestasjon.',
                 'responsible_department': 'Plan- og bygningsetaten',
                 'date_published': '2019-03-15',
@@ -252,7 +252,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Bolig',
                 'document_type': 'Strategiplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/boligpolitikk/',
+                'url': 'https://www.oslo.kommune.no/byutvikling/',
                 'description': 'Helhetlig strategi for boligutvikling med mål om å sikre gode boliger for alle inntektsgrupper.',
                 'responsible_department': 'Bolig- og sosiale tjenester',
                 'date_published': '2020-11-25',
@@ -267,7 +267,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Kollektivtransport',
                 'document_type': 'Transportplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/transport/kollektivtransport/',
+                'url': 'https://www.oslo.kommune.no/gate-transport-og-parkering/',
                 'description': 'Omfattende satsing på kollektivtransport, sykkel og gange for å redusere biltrafikk og klimautslipp.',
                 'responsible_department': 'Bymiljøetaten',
                 'date_published': '2016-06-22',
@@ -280,7 +280,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Sykkel',
                 'document_type': 'Sektorplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/slik-bygges-oslo/transport/sykkel/',
+                'url': 'https://www.oslo.kommune.no/gate-transport-og-parkering/',
                 'description': 'Plan for utbygging av sammenhengende og trygt sykkelveisystem i hele Oslo.',
                 'responsible_department': 'Bymiljøetaten',
                 'date_published': '2015-09-16',
@@ -295,7 +295,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Grunnskole',
                 'document_type': 'Behovsplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/skole/skolebehovsplan/',
+                'url': 'https://www.oslo.kommune.no/skole-og-utdanning/',
                 'description': 'Langsiktig plan for fremtidig skolebehov og kapasitet basert på befolkningsvekst og utbyggingsplaner.',
                 'responsible_department': 'Utdanningsetaten',
                 'date_published': '2020-04-29',
@@ -308,7 +308,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Barnehage',
                 'document_type': 'Sektorplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/barnehage/barnehageplan/',
+                'url': 'https://www.oslo.kommune.no/barnehage/',
                 'description': 'Plan for barnehageutbygging og kvalitetsutvikling med full dekning som hovedmål.',
                 'responsible_department': 'Utdanningsetaten',
                 'date_published': '2020-02-19',
@@ -321,7 +321,7 @@ class OsloPlanningPremium:
                 'subcategory': 'Tidlig innsats',
                 'document_type': 'Strategiplan',
                 'status': 'Vedtatt',
-                'url': '/politikk-og-administrasjon/velferd/barn-og-unge/tidlig-innsats/',
+                'url': 'https://www.oslo.kommune.no/barnehage/',
                 'description': 'Tverrsektoriell strategi for forebyggende arbeid og tidlig inngripen overfor barn og unge.',
                 'responsible_department': 'Barne- og ungdomsetaten',
                 'date_published': '2020-01-22',
@@ -491,6 +491,15 @@ class OsloPlanningPremium:
         # Insert documents with hash for deduplication
         for doc in verified_documents:
             doc_hash = hashlib.md5(doc['title'].encode()).hexdigest()
+            
+            # Fix URL - use as-is if already absolute, otherwise make it a search URL
+            if doc['url'].startswith('http'):
+                final_url = doc['url']
+            else:
+                # For relative URLs, create a search URL on Oslo Kommune website
+                search_term = doc['title'].replace(' ', '+')
+                final_url = f"https://www.oslo.kommune.no/sok/?q={search_term}"
+            
             cursor.execute('''
                 INSERT OR REPLACE INTO oslo_planning_documents 
                 (title, category, subcategory, document_type, status, url, 
@@ -499,8 +508,7 @@ class OsloPlanningPremium:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 doc['title'], doc['category'], doc['subcategory'], 
-                doc['document_type'], doc['status'], 
-                self.base_url + doc['url'] if doc['url'].startswith('/') else doc['url'],
+                doc['document_type'], doc['status'], final_url,
                 doc['description'], doc['responsible_department'], 
                 doc['date_published'], doc['priority'], doc['tags'], doc_hash
             ))
