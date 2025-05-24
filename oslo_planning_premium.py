@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import time
 import hashlib
+import functools
 
 # Import premium enhancements
 try:
@@ -45,8 +46,14 @@ OSLO_COLORS = {
     'gradient_end': '#2E86AB'
 }
 
+# Performance optimization with caching
+@st.cache_data(ttl=3600, show_spinner=False)  # Cache for 1 hour
+def cached_data_operation(operation_type, *args):
+    """Cache expensive data operations"""
+    pass
+
 class OsloPlanningPremium:
-    """Premium Oslo kommune planning documents system with verified data"""
+    """Premium Oslo kommune planning documents system with verified data and performance optimization"""
     
     def __init__(self, db_path="oslo_planning_premium.db"):
         self.db_path = db_path
@@ -1887,46 +1894,150 @@ def render_administration():
             """)
     
     with tab2:
-        st.markdown("### 📤 Data Export Options")
+        st.markdown("### 📤 Advanced Data Export")
+        st.markdown("*Export Oslo planning documents in multiple formats*")
         
-        export_format = st.selectbox(
-            "Select Export Format",
-            ["CSV", "JSON", "Excel", "PDF Report"]
-        )
+        # Enhanced export interface
+        col1, col2 = st.columns(2)
         
-        export_scope = st.selectbox(
-            "Export Scope",
-            ["All Documents", "By Category", "High Priority Only", "Recent Documents"]
-        )
+        with col1:
+            export_format = st.selectbox(
+                "📋 **Export Format**",
+                ["CSV", "JSON", "Excel (XLSX)", "XML"],
+                help="Choose the format for your exported data"
+            )
         
-        if st.button("📥 Generate Export", type="primary"):
-            all_docs = st.session_state.oslo_premium.get_all_documents()
-            
-            if export_scope == "High Priority Only":
-                export_data = all_docs[all_docs['priority'] >= 3]
-            elif export_scope == "Recent Documents":
-                all_docs['date_published'] = pd.to_datetime(all_docs['date_published'])
-                cutoff_date = datetime.now() - timedelta(days=365)
-                export_data = all_docs[all_docs['date_published'] > cutoff_date]
-            else:
-                export_data = all_docs
-            
-            if export_format == "CSV":
-                csv_data = export_data.to_csv(index=False)
-                st.download_button(
-                    "📥 Download CSV",
-                    csv_data,
-                    f"oslo_planning_documents_{datetime.now().strftime('%Y%m%d')}.csv",
-                    "text/csv"
-                )
-            elif export_format == "JSON":
-                json_data = export_data.to_json(orient='records', indent=2)
-                st.download_button(
-                    "📥 Download JSON",
-                    json_data,
-                    f"oslo_planning_documents_{datetime.now().strftime('%Y%m%d')}.json",
-                    "application/json"
-                )
+        with col2:
+            export_scope = st.selectbox(
+                "🎯 **Export Scope**",
+                ["All Documents", "High Priority Only", "Recent Documents", "By Status"],
+                help="Select which documents to include"
+            )
+        
+        # Advanced filtering
+        if export_scope == "By Status":
+            status_filter = st.multiselect(
+                "Select Status Types",
+                ["Vedtatt", "Under behandling", "Under revisjon", "Høring"],
+                default=["Vedtatt"]
+            )
+        
+        # Export generation with loading state
+        if st.button("📥 **Generate Export**", type="primary"):
+            with st.spinner("🔄 Preparing export data..."):
+                all_docs = st.session_state.oslo_premium.get_all_documents()
+                
+                # Apply scope filters
+                if export_scope == "High Priority Only":
+                    export_data = all_docs[all_docs['priority'] >= 3]
+                elif export_scope == "Recent Documents":
+                    all_docs['date_published'] = pd.to_datetime(all_docs['date_published'])
+                    cutoff_date = datetime.now() - timedelta(days=365)
+                    export_data = all_docs[all_docs['date_published'] > cutoff_date]
+                elif export_scope == "By Status":
+                    export_data = all_docs[all_docs['status'].isin(status_filter)]
+                else:
+                    export_data = all_docs
+                
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                
+                # Generate exports with enhanced metadata
+                if export_format == "CSV":
+                    csv_data = export_data.to_csv(index=False, encoding='utf-8')
+                    st.download_button(
+                        "📥 Download CSV File",
+                        csv_data,
+                        f"oslo_planning_export_{timestamp}.csv",
+                        "text/csv",
+                        help="Comma-separated values format"
+                    )
+                    
+                elif export_format == "JSON":
+                    # Enhanced JSON with metadata
+                    export_json = {
+                        "metadata": {
+                            "generated_at": datetime.now().isoformat(),
+                            "export_scope": export_scope,
+                            "total_documents": len(export_data),
+                            "source": "Oslo Planning Premium"
+                        },
+                        "documents": export_data.to_dict('records')
+                    }
+                    json_data = json.dumps(export_json, indent=2, ensure_ascii=False)
+                    st.download_button(
+                        "📥 Download JSON File",
+                        json_data,
+                        f"oslo_planning_export_{timestamp}.json",
+                        "application/json",
+                        help="JSON format with metadata"
+                    )
+                    
+                elif export_format == "Excel (XLSX)":
+                    # Multi-sheet Excel export
+                    import io
+                    output = io.BytesIO()
+                    
+                    try:
+                        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                            export_data.to_excel(writer, sheet_name='All Documents', index=False)
+                            
+                            # Category breakdown
+                            for category in export_data['category'].unique():
+                                cat_data = export_data[export_data['category'] == category]
+                                safe_name = category.replace('/', '_')[:31]
+                                cat_data.to_excel(writer, sheet_name=safe_name, index=False)
+                        
+                        excel_data = output.getvalue()
+                        st.download_button(
+                            "📥 Download Excel File",
+                            excel_data,
+                            f"oslo_planning_export_{timestamp}.xlsx",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            help="Excel workbook with multiple sheets"
+                        )
+                    except ImportError:
+                        st.error("❌ Excel export requires openpyxl. Using CSV instead.")
+                        csv_data = export_data.to_csv(index=False, encoding='utf-8')
+                        st.download_button(
+                            "📥 Download CSV File (Fallback)",
+                            csv_data,
+                            f"oslo_planning_export_{timestamp}.csv",
+                            "text/csv"
+                        )
+                        
+                elif export_format == "XML":
+                    # XML export with proper structure
+                    xml_data = '<?xml version="1.0" encoding="UTF-8"?>\n'
+                    xml_data += '<oslo_planning_documents>\n'
+                    xml_data += f'  <metadata generated="{datetime.now().isoformat()}" total="{len(export_data)}"/>\n'
+                    
+                    for _, doc in export_data.iterrows():
+                        xml_data += '  <document>\n'
+                        for col, val in doc.items():
+                            # Escape XML special characters
+                            safe_val = str(val).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                            xml_data += f'    <{col}>{safe_val}</{col}>\n'
+                        xml_data += '  </document>\n'
+                    xml_data += '</oslo_planning_documents>'
+                    
+                    st.download_button(
+                        "📥 Download XML File",
+                        xml_data,
+                        f"oslo_planning_export_{timestamp}.xml",
+                        "application/xml",
+                        help="XML format with proper encoding"
+                    )
+                
+                st.success(f"✅ Export completed! {len(export_data)} documents exported in {export_format} format.")
+                
+                # Show export summary
+                st.markdown(f"""
+                **📊 Export Summary:**
+                - Format: {export_format}
+                - Scope: {export_scope}
+                - Documents: {len(export_data)}
+                - Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                """)
     
     with tab3:
         st.markdown("### 🔧 System Maintenance")

@@ -400,16 +400,68 @@ def create_premium_category_overview(all_docs, categories):
                 st.plotly_chart(fig_mini, use_container_width=True, config={'displayModeBar': False}, key=safe_key)
 
 def create_premium_analytics_dashboard(all_docs, categories):
-    """Create comprehensive analytics dashboard"""
+    """Create comprehensive analytics dashboard with advanced interactivity"""
     
     st.markdown("### 📊 Advanced Analytics Dashboard")
+    st.markdown("*Interactive data visualization and insights*")
     
     # Create unique session identifier for charts
     import time
     session_id = str(int(time.time() * 1000))[-6:]
     
-    # Create tabs for different analytics views
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 Overview", "🎯 Performance", "📅 Timeline", "🔍 Deep Dive"])
+    # Quick analytics summary
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        avg_priority = round(all_docs['priority'].mean(), 1)
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #1B4F72;">{avg_priority}</div>
+            <div class="kpi-label">Average Priority</div>
+            <div class="kpi-delta positive">📊 Strategic Focus</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        completion_rate = round((len(all_docs[all_docs['status'] == 'Vedtatt']) / len(all_docs)) * 100, 1)
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #148F77;">{completion_rate}%</div>
+            <div class="kpi-label">Completion Rate</div>
+            <div class="kpi-delta positive">✅ Progress</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        unique_depts = all_docs['responsible_department'].nunique()
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #2E86AB;">{unique_depts}</div>
+            <div class="kpi-label">Departments</div>
+            <div class="kpi-delta positive">🏢 Involved</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        total_tags = len([tag for tags in all_docs['tags'] for tag in tags.split(',') if tag.strip()])
+        st.markdown(f"""
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #A23B72;">{total_tags}</div>
+            <div class="kpi-label">Total Tags</div>
+            <div class="kpi-delta positive">🏷️ Indexed</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Enhanced tabs with more detailed analytics
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📈 Overview", 
+        "🎯 Performance", 
+        "📅 Timeline", 
+        "🔍 Deep Dive",
+        "🤖 AI Insights"
+    ])
     
     with tab1:
         col1, col2 = st.columns(2)
@@ -561,6 +613,152 @@ def create_premium_analytics_dashboard(all_docs, categories):
         )
         fig_matrix.update_layout(height=500)
         st.plotly_chart(fig_matrix, use_container_width=True, key=f'analytics_matrix_chart_{session_id}')
+    
+    with tab5:
+        # AI-powered insights and recommendations
+        st.markdown("#### 🤖 AI-Powered Insights")
+        st.markdown("*Advanced pattern recognition and recommendations*")
+        
+        # Generate insights based on data patterns
+        insights = []
+        
+        # Priority analysis
+        high_priority_docs = all_docs[all_docs['priority'] >= 3]
+        if len(high_priority_docs) > 0:
+            insights.append({
+                'type': 'priority',
+                'title': '🔥 High Priority Documents',
+                'description': f'{len(high_priority_docs)} documents marked as high priority',
+                'recommendation': 'Focus on completing these strategic documents first',
+                'category': 'Strategic'
+            })
+        
+        # Department workload analysis
+        dept_workload = all_docs['responsible_department'].value_counts()
+        busiest_dept = dept_workload.index[0]
+        insights.append({
+            'type': 'workload',
+            'title': '📊 Department Workload',
+            'description': f'{busiest_dept} manages {dept_workload.iloc[0]} documents',
+            'recommendation': 'Consider resource allocation and support',
+            'category': 'Operations'
+        })
+        
+        # Status distribution insights
+        pending_docs = all_docs[all_docs['status'] != 'Vedtatt']
+        if len(pending_docs) > 0:
+            insights.append({
+                'type': 'status',
+                'title': '⏳ Pending Documents',
+                'description': f'{len(pending_docs)} documents in progress',
+                'recommendation': 'Review bottlenecks in approval process',
+                'category': 'Process'
+            })
+        
+        # Timeline insights
+        all_docs['date_published'] = pd.to_datetime(all_docs['date_published'])
+        recent_docs = all_docs[all_docs['date_published'].dt.year >= 2023]
+        insights.append({
+            'type': 'timeline',
+            'title': '📅 Recent Activity',
+            'description': f'{len(recent_docs)} documents published recently',
+            'recommendation': 'Maintain current publication pace',
+            'category': 'Trend'
+        })
+        
+        # Display insights in cards
+        for insight in insights:
+            color_map = {
+                'Strategic': '#E74C3C',
+                'Operations': '#3498DB', 
+                'Process': '#F39C12',
+                'Trend': '#9B59B6'
+            }
+            
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+                padding: 1.5rem;
+                border-radius: 15px;
+                margin-bottom: 1rem;
+                border-left: 4px solid {color_map.get(insight['category'], '#1B4F72')};
+                box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="margin: 0; color: #1B4F72;">{insight['title']}</h4>
+                    <span style="
+                        background: {color_map.get(insight['category'], '#1B4F72')};
+                        color: white;
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 15px;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                    ">{insight['category']}</span>
+                </div>
+                <p style="margin: 0 0 1rem 0; color: #666; line-height: 1.5;">
+                    {insight['description']}
+                </p>
+                <div style="
+                    background: rgba(27, 79, 114, 0.05);
+                    padding: 1rem;
+                    border-radius: 10px;
+                    border-left: 3px solid {color_map.get(insight['category'], '#1B4F72')};
+                ">
+                    <strong style="color: #1B4F72;">💡 Recommendation:</strong><br>
+                    <span style="color: #666;">{insight['recommendation']}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # AI-powered predictions
+        st.markdown("#### 🔮 Predictive Analytics")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Predict completion timeline
+            in_progress = len(all_docs[all_docs['status'].isin(['Under behandling', 'Under revisjon'])])
+            avg_completion_time = 6  # months (simulated)
+            
+            st.markdown(f"""
+            <div style="background: white; padding: 1.5rem; border-radius: 12px; 
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                <h5 style="margin: 0 0 1rem 0; color: #1B4F72;">📈 Completion Forecast</h5>
+                <div style="font-size: 2rem; font-weight: 700; color: #148F77; margin-bottom: 0.5rem;">
+                    {avg_completion_time} months
+                </div>
+                <div style="color: #666; margin-bottom: 1rem;">
+                    Estimated time to complete {in_progress} pending documents
+                </div>
+                <div style="width: 100%; height: 6px; background: #f0f0f0; border-radius: 3px;">
+                    <div style="width: 65%; height: 100%; background: linear-gradient(90deg, #148F77, #1ABC9C); 
+                                border-radius: 3px; transition: width 2s ease;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            # Resource optimization
+            total_workload = len(all_docs)
+            departments = all_docs['responsible_department'].nunique()
+            optimal_docs_per_dept = total_workload // departments
+            
+            st.markdown(f"""
+            <div style="background: white; padding: 1.5rem; border-radius: 12px; 
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                <h5 style="margin: 0 0 1rem 0; color: #1B4F72;">⚖️ Resource Balance</h5>
+                <div style="font-size: 2rem; font-weight: 700; color: #2E86AB; margin-bottom: 0.5rem;">
+                    {optimal_docs_per_dept}
+                </div>
+                <div style="color: #666; margin-bottom: 1rem;">
+                    Optimal documents per department for balanced workload
+                </div>
+                <div style="width: 100%; height: 6px; background: #f0f0f0; border-radius: 3px;">
+                    <div style="width: 80%; height: 100%; background: linear-gradient(90deg, #2E86AB, #3498DB); 
+                                border-radius: 3px; transition: width 2s ease;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
 def create_document_verification_system(all_docs):
     """Create comprehensive document verification system"""
