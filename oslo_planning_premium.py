@@ -1179,7 +1179,76 @@ def render_executive_dashboard():
     if ENHANCEMENTS_AVAILABLE:
         create_enhanced_kpi_cards(all_docs)
         st.markdown("<br>", unsafe_allow_html=True)
-        create_premium_category_overview(all_docs, categories)
+        # Category overview with fixed HTML rendering
+        st.markdown("### 📁 Category Intelligence Overview")
+        
+        # Category statistics
+        category_stats = []
+        for _, category in categories.iterrows():
+            cat_docs = all_docs[all_docs['category'] == category['category_name']]
+            vedtatt_count = len(cat_docs[cat_docs['status'] == 'Vedtatt'])
+            avg_priority = cat_docs['priority'].mean()
+            
+            category_stats.append({
+                'category': category['category_name'],
+                'icon': category['icon'],
+                'color': category['color'],
+                'total_docs': len(cat_docs),
+                'completed': vedtatt_count,
+                'completion_rate': (vedtatt_count / len(cat_docs) * 100) if len(cat_docs) > 0 else 0,
+                'avg_priority': avg_priority,
+                'description': category['description']
+            })
+        
+        # Sort by total documents
+        category_stats.sort(key=lambda x: x['total_docs'], reverse=True)
+        
+        # Display category cards in rows
+        for i in range(0, len(category_stats), 2):
+            col1, col2 = st.columns(2)
+            
+            for j, col in enumerate([col1, col2]):
+                if i + j < len(category_stats):
+                    cat_stat = category_stats[i + j]
+                    with col:
+                        # Category card with proper metrics
+                        st.markdown(f"""
+                        <div style="background: white; padding: 1.5rem; border-radius: 10px; 
+                                    border-left: 4px solid {cat_stat['color']}; margin-bottom: 1rem;
+                                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                                <span style="font-size: 2rem; margin-right: 1rem;">{cat_stat['icon']}</span>
+                                <div>
+                                    <h4 style="margin: 0; color: {cat_stat['color']};">{cat_stat['category']}</h4>
+                                    <p style="margin: 0; font-size: 0.9rem; color: #666;">{cat_stat['description']}</p>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: {cat_stat['color']};">{cat_stat['total_docs']}</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Documents</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #148F77;">{cat_stat['completed']}</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Completed</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #F39C12;">{cat_stat['completion_rate']:.0f}%</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Rate</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #9B59B6;">{cat_stat['avg_priority']:.1f}</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Avg Priority</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px;">
+                                    <div style="width: {cat_stat['completion_rate']:.0f}%; height: 100%; 
+                                               background: linear-gradient(90deg, #148F77, #1ABC9C); border-radius: 3px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
     else:
         # Fallback simple metrics
         col1, col2, col3, col4 = st.columns(4)
