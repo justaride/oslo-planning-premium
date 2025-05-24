@@ -1,0 +1,6 @@
+# System packages required for Streamlit Cloud
+# These will be installed via apt-get
+
+# For better performance and compatibility
+libc6-dev
+gcc
