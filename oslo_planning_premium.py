@@ -876,6 +876,25 @@ def render_executive_dashboard():
     all_docs = st.session_state.oslo_premium.get_all_documents()
     categories = st.session_state.oslo_premium.get_categories()
     
+    # Debug information for cloud deployment
+    if len(all_docs) == 0:
+        st.error("🚨 Database initialization failed!")
+        st.info(f"Debug info:")
+        st.code(f"""
+        Database path: {st.session_state.oslo_premium.db_path}
+        Categories found: {len(categories)}
+        Application initialized: {hasattr(st.session_state, 'oslo_premium')}
+        """)
+        
+        # Try to reinitialize
+        st.warning("Attempting to reinitialize database...")
+        try:
+            st.session_state.oslo_premium.init_premium_database()
+            all_docs = st.session_state.oslo_premium.get_all_documents()
+            st.success(f"✅ Reinitialization successful! Found {len(all_docs)} documents.")
+        except Exception as e:
+            st.error(f"❌ Reinitialization failed: {str(e)}")
+    
     # Enhanced KPI Cards and Category Overview
     if ENHANCEMENTS_AVAILABLE:
         create_enhanced_kpi_cards(all_docs)

@@ -125,10 +125,17 @@ def create_premium_dashboard_header():
 def create_enhanced_kpi_cards(all_docs):
     """Create enhanced KPI cards with animations"""
     
-    # Calculate KPIs
+    # Calculate KPIs with safe division
     total_docs = len(all_docs)
+    
+    # Handle empty dataset
+    if total_docs == 0:
+        st.error("⚠️ No documents found in database. Please check database initialization.")
+        st.info("Debug: Database appears to be empty. This might be due to cloud environment setup.")
+        return
+    
     vedtatt_count = len(all_docs[all_docs['status'] == 'Vedtatt'])
-    completion_rate = round((vedtatt_count / total_docs) * 100)
+    completion_rate = round((vedtatt_count / total_docs) * 100) if total_docs > 0 else 0
     high_priority = len(all_docs[all_docs['priority'] >= 3])
     categories = all_docs['category'].nunique()
     
