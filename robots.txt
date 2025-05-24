@@ -1,0 +1,11 @@
+# robots.txt for Oslo Planning Premium + AI System
+# Allow all web crawlers to access all content
+
+User-agent: *
+Allow: /
+
+# Sitemap (if you add one later)
+# Sitemap: https://your-app-url.streamlit.app/sitemap.xml
+
+# This file allows search engines to index your Oslo Planning application
+# making it discoverable for planning professionals looking for Oslo documents
