@@ -1302,6 +1302,10 @@ def render_analytics_premium():
     """Render premium analytics dashboard"""
     
     st.markdown("## 📈 Advanced Planning Analytics")
+    
+    # Create unique session identifier for charts
+    import time
+    session_id = str(int(time.time() * 1000))[-6:]
     st.markdown("*Comprehensive insights into Oslo's planning landscape*")
     
     all_docs = st.session_state.oslo_premium.get_all_documents()
@@ -1366,7 +1370,7 @@ def render_analytics_premium():
             title="Department Distribution"
         )
         fig_dept.update_layout(height=400)
-        st.plotly_chart(fig_dept, use_container_width=True, key='main_dept_chart')
+        st.plotly_chart(fig_dept, use_container_width=True, key=f'main_dept_chart_{session_id}')
     
     with col2:
         st.markdown("### 📊 Document Types")
@@ -1381,7 +1385,7 @@ def render_analytics_premium():
             )
         ])
         fig_types.update_layout(height=400, title="Document Type Distribution")
-        st.plotly_chart(fig_types, use_container_width=True, key='main_types_chart')
+        st.plotly_chart(fig_types, use_container_width=True, key=f'main_types_chart_{session_id}')
     
     # Timeline Analysis
     st.markdown("### 📅 Publication Timeline")
@@ -1398,7 +1402,7 @@ def render_analytics_premium():
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     fig_timeline.update_layout(height=400)
-    st.plotly_chart(fig_timeline, use_container_width=True, key='main_timeline_chart')
+    st.plotly_chart(fig_timeline, use_container_width=True, key=f'main_timeline_chart_{session_id}')
     
     # Priority vs Category Analysis
     st.markdown("### 🎯 Priority Matrix")
@@ -1420,7 +1424,7 @@ def render_analytics_premium():
         title="Priority Distribution Across Categories"
     )
     fig_matrix.update_layout(height=500)
-    st.plotly_chart(fig_matrix, use_container_width=True, key='main_matrix_chart')
+    st.plotly_chart(fig_matrix, use_container_width=True, key=f'main_matrix_chart_{session_id}')
 
 
 def render_verification_premium():
@@ -1428,6 +1432,10 @@ def render_verification_premium():
     
     st.markdown("## ✅ System Verification & Quality Control")
     st.markdown("*Comprehensive verification of all planning documents*")
+    
+    # Create unique session identifier for charts
+    import time
+    session_id = str(int(time.time() * 1000))[-6:]
     
     all_docs = st.session_state.oslo_premium.get_all_documents()
     
@@ -1532,7 +1540,7 @@ def render_verification_premium():
                 color=quality_dist.values,
                 color_continuous_scale='Greens'
             )
-            st.plotly_chart(fig_quality, use_container_width=True, key='quality_analysis_chart')
+            st.plotly_chart(fig_quality, use_container_width=True, key=f'quality_analysis_chart_{session_id}')
         
         with col2:
             st.markdown("#### 🔗 URL Status")
@@ -1543,7 +1551,7 @@ def render_verification_premium():
                 names=url_status.index,
                 title="URL Availability"
             )
-            st.plotly_chart(fig_url, use_container_width=True, key='url_analysis_chart')
+            st.plotly_chart(fig_url, use_container_width=True, key=f'url_analysis_chart_{session_id}')
         
         st.markdown("#### 📋 Detailed Verification Results")
         st.dataframe(verification_df, use_container_width=True)
@@ -1679,7 +1687,7 @@ def render_administration():
                 color_continuous_scale='Greens'
             )
             fig_perf.update_layout(height=400)
-            st.plotly_chart(fig_perf, use_container_width=True, key='performance_analysis_chart')
+            st.plotly_chart(fig_perf, use_container_width=True, key=f'performance_analysis_chart_{session_id}')
         
         with col2:
             st.markdown("#### 📊 Performance Summary")

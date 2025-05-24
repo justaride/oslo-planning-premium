@@ -256,6 +256,10 @@ def create_premium_category_overview(all_docs, categories):
     
     st.markdown("### 📁 Category Intelligence Overview")
     
+    # Create unique session identifier for keys
+    import time
+    session_id = str(int(time.time() * 1000))[-6:]  # Last 6 digits of timestamp
+    
     # Category statistics
     category_stats = []
     for _, category in categories.iterrows():
@@ -390,12 +394,19 @@ def create_premium_category_overview(all_docs, categories):
                     plot_bgcolor='rgba(0,0,0,0)'
                 )
                 
-                st.plotly_chart(fig_mini, use_container_width=True, config={'displayModeBar': False}, key=f'mini_chart_{category}')
+                # Create safe and unique key from category name, index, and session
+                safe_category = cat_stat['category'].replace(' ', '_').replace('&', 'and').replace('ø', 'o').replace('å', 'a').replace('æ', 'ae')
+                safe_key = f"mini_chart_{safe_category}_{i}_{session_id}"
+                st.plotly_chart(fig_mini, use_container_width=True, config={'displayModeBar': False}, key=safe_key)
 
 def create_premium_analytics_dashboard(all_docs, categories):
     """Create comprehensive analytics dashboard"""
     
     st.markdown("### 📊 Advanced Analytics Dashboard")
+    
+    # Create unique session identifier for charts
+    import time
+    session_id = str(int(time.time() * 1000))[-6:]
     
     # Create tabs for different analytics views
     tab1, tab2, tab3, tab4 = st.tabs(["📈 Overview", "🎯 Performance", "📅 Timeline", "🔍 Deep Dive"])
@@ -419,7 +430,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 font_family="Arial",
                 title_font_size=16
             )
-            st.plotly_chart(fig_dept, use_container_width=True, key='analytics_dept_chart')
+            st.plotly_chart(fig_dept, use_container_width=True, key=f'analytics_dept_chart_{session_id}')
         
         with col2:
             # Priority distribution
@@ -443,7 +454,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 font_family="Arial",
                 title_font_size=16
             )
-            st.plotly_chart(fig_priority, use_container_width=True, key='analytics_priority_chart')
+            st.plotly_chart(fig_priority, use_container_width=True, key=f'analytics_priority_chart_{session_id}')
     
     with tab2:
         # Performance metrics
@@ -470,7 +481,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 color_continuous_scale='Greens'
             )
             fig_completion.update_layout(height=400)
-            st.plotly_chart(fig_completion, use_container_width=True, key='analytics_completion_chart')
+            st.plotly_chart(fig_completion, use_container_width=True, key=f'analytics_completion_chart_{session_id}')
         
         with col2:
             # Status breakdown with enhanced styling
@@ -494,7 +505,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 font_family="Arial",
                 title_font_size=16
             )
-            st.plotly_chart(fig_status, use_container_width=True, key='analytics_status_chart')
+            st.plotly_chart(fig_status, use_container_width=True, key=f'analytics_status_chart_{session_id}')
     
     with tab3:
         # Timeline analysis
@@ -510,7 +521,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
             color_discrete_sequence=px.colors.qualitative.Set3
         )
         fig_timeline.update_layout(height=500)
-        st.plotly_chart(fig_timeline, use_container_width=True, key='analytics_timeline_chart')
+        st.plotly_chart(fig_timeline, use_container_width=True, key=f'analytics_timeline_chart_{session_id}')
         
         # Recent activity
         st.markdown("#### 🔄 Recent Activity")
@@ -549,7 +560,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
             title="📊 Category vs Status Matrix"
         )
         fig_matrix.update_layout(height=500)
-        st.plotly_chart(fig_matrix, use_container_width=True, key='analytics_matrix_chart')
+        st.plotly_chart(fig_matrix, use_container_width=True, key=f'analytics_matrix_chart_{session_id}')
 
 def create_document_verification_system(all_docs):
     """Create comprehensive document verification system"""
