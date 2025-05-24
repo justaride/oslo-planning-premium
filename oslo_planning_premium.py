@@ -51,7 +51,13 @@ class OsloPlanningPremium:
     def __init__(self, db_path="oslo_planning_premium.db"):
         self.db_path = db_path
         self.base_url = "https://oslo.kommune.no"
-        self.init_premium_database()
+        # For in-memory databases, keep the connection alive
+        if db_path == ":memory:":
+            self.conn = sqlite3.connect(db_path)
+            self.init_premium_database_with_connection(self.conn)
+        else:
+            self.conn = None
+            self.init_premium_database()
         
     def init_premium_database(self):
         """Initialize premium database with verified Oslo planning documents"""
@@ -97,12 +103,64 @@ class OsloPlanningPremium:
         ''')
         
         conn.commit()
-        conn.close()
         
-        self.insert_verified_documents()
+        # Insert verified documents in same transaction
+        self.insert_verified_documents_internal(conn, cursor)
+        
+        conn.commit()
+        conn.close()
     
-    def insert_verified_documents(self):
-        """Insert completely verified and deduplicated Oslo planning documents"""
+    def init_premium_database_with_connection(self, conn):
+        """Initialize database with existing connection (for in-memory databases)"""
+        cursor = conn.cursor()
+        
+        # Drop existing tables to ensure clean data
+        cursor.execute('DROP TABLE IF EXISTS oslo_planning_documents')
+        cursor.execute('DROP TABLE IF EXISTS document_categories')
+        cursor.execute('DROP TABLE IF EXISTS verification_log')
+        
+        # Premium planning documents table
+        cursor.execute('''
+        CREATE TABLE oslo_planning_documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT UNIQUE NOT NULL,
+            category TEXT NOT NULL,
+            subcategory TEXT,
+            document_type TEXT,
+            status TEXT,
+            url TEXT,
+            description TEXT,
+            responsible_department TEXT,
+            date_published TEXT,
+            priority INTEGER DEFAULT 1,
+            tags TEXT,
+            verification_status TEXT DEFAULT 'verified',
+            last_verified DATETIME DEFAULT CURRENT_TIMESTAMP,
+            document_hash TEXT
+        )
+        ''')
+        
+        # Categories table
+        cursor.execute('''
+        CREATE TABLE document_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category_name TEXT UNIQUE NOT NULL,
+            icon TEXT,
+            color TEXT,
+            description TEXT,
+            display_order INTEGER
+        )
+        ''')
+        
+        conn.commit()
+        
+        # Insert verified documents in same transaction
+        self.insert_verified_documents_internal(conn, cursor)
+        
+        conn.commit()
+    
+    def insert_verified_documents_internal(self, conn, cursor):
+        """Internal method to insert documents with existing connection"""
         
         # Verified unique Oslo kommune planning documents
         verified_documents = [
@@ -408,9 +466,6 @@ class OsloPlanningPremium:
             ('Næring og innovasjon', '💼', '#34495E', 'Næring, innovasjon og digitalisering', 8)
         ]
         
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        
         # Insert categories
         for category in categories:
             cursor.execute('''
@@ -436,49 +491,74 @@ class OsloPlanningPremium:
                 doc['date_published'], doc['priority'], doc['tags'], doc_hash
             ))
         
+        print(f"✅ Premium database initialized with {len(verified_documents)} verified documents")
+    
+    def insert_verified_documents(self):
+        """Public method to insert verified documents (creates own connection)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        self.insert_verified_documents_internal(conn, cursor)
         conn.commit()
         conn.close()
-        
-        print(f"✅ Premium database initialized with {len(verified_documents)} verified documents")
     
     def get_all_documents(self):
         """Get all documents"""
-        conn = sqlite3.connect(self.db_path)
-        df = pd.read_sql_query("SELECT * FROM oslo_planning_documents ORDER BY priority DESC, title", conn)
-        conn.close()
+        if self.conn is not None:
+            # Use persistent connection for in-memory databases
+            df = pd.read_sql_query("SELECT * FROM oslo_planning_documents ORDER BY priority DESC, title", self.conn)
+        else:
+            # Create new connection for file databases
+            conn = sqlite3.connect(self.db_path)
+            df = pd.read_sql_query("SELECT * FROM oslo_planning_documents ORDER BY priority DESC, title", conn)
+            conn.close()
         return df
     
     def get_categories(self):
         """Get all categories with metadata"""
-        conn = sqlite3.connect(self.db_path)
-        df = pd.read_sql_query("SELECT * FROM document_categories ORDER BY display_order", conn)
-        conn.close()
+        if self.conn is not None:
+            df = pd.read_sql_query("SELECT * FROM document_categories ORDER BY display_order", self.conn)
+        else:
+            conn = sqlite3.connect(self.db_path)
+            df = pd.read_sql_query("SELECT * FROM document_categories ORDER BY display_order", conn)
+            conn.close()
         return df
     
     def get_documents_by_category(self, category=None):
         """Get documents by category"""
-        conn = sqlite3.connect(self.db_path)
-        if category:
-            df = pd.read_sql_query(
-                "SELECT * FROM oslo_planning_documents WHERE category = ? ORDER BY priority DESC, title", 
-                conn, params=[category]
-            )
+        if self.conn is not None:
+            if category:
+                df = pd.read_sql_query(
+                    "SELECT * FROM oslo_planning_documents WHERE category = ? ORDER BY priority DESC, title", 
+                    self.conn, params=[category]
+                )
+            else:
+                df = pd.read_sql_query("SELECT * FROM oslo_planning_documents ORDER BY priority DESC, title", self.conn)
         else:
-            df = pd.read_sql_query("SELECT * FROM oslo_planning_documents ORDER BY priority DESC, title", conn)
-        conn.close()
+            conn = sqlite3.connect(self.db_path)
+            if category:
+                df = pd.read_sql_query(
+                    "SELECT * FROM oslo_planning_documents WHERE category = ? ORDER BY priority DESC, title", 
+                    conn, params=[category]
+                )
+            else:
+                df = pd.read_sql_query("SELECT * FROM oslo_planning_documents ORDER BY priority DESC, title", conn)
+            conn.close()
         return df
     
     def search_documents(self, search_term):
         """Search documents"""
-        conn = sqlite3.connect(self.db_path)
         query = """
         SELECT * FROM oslo_planning_documents 
         WHERE title LIKE ? OR description LIKE ? OR tags LIKE ?
         ORDER BY priority DESC, title
         """
         search_pattern = f"%{search_term}%"
-        df = pd.read_sql_query(query, conn, params=[search_pattern, search_pattern, search_pattern])
-        conn.close()
+        if self.conn is not None:
+            df = pd.read_sql_query(query, self.conn, params=[search_pattern, search_pattern, search_pattern])
+        else:
+            conn = sqlite3.connect(self.db_path)
+            df = pd.read_sql_query(query, conn, params=[search_pattern, search_pattern, search_pattern])
+            conn.close()
         return df
 
 

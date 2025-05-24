@@ -21,11 +21,11 @@ urllib3>=1.26.0,<3.0.0
 # Date and Time Processing
 python-dateutil>=2.8.0,<3.0.0
 
-# File Path Handling
-pathlib2>=2.3.0,<3.0.0; python_version < "3.4"
+# File Path Handling - pathlib is built into Python 3.4+
+# pathlib2 not needed for modern Python versions
 
-# Hashing and Cryptography
-hashlib-compat>=1.0.1; python_version < "3.2"
+# Hashing and Cryptography - hashlib is built into Python standard library
+# hashlib-compat not needed for modern Python versions
 
 # Optional Development Dependencies
 # Uncomment for development environment
