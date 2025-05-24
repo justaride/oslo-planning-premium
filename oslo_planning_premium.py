@@ -749,6 +749,107 @@ def apply_premium_styling():
         margin-bottom: 0.3rem;
         display: inline-block;
         font-weight: 500;
+        border: 1px solid rgba(27, 79, 114, 0.2);
+    }}
+    
+    /* Status Høring */
+    .status-horing {{
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498DB;
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }}
+    
+    /* Document Link Buttons */
+    .document-link {{
+        background: linear-gradient(135deg, {OSLO_COLORS['primary']} 0%, {OSLO_COLORS['secondary']} 100%);
+        color: white !important;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        text-decoration: none !important;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        display: inline-block;
+    }}
+    
+    .document-link:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        text-decoration: none !important;
+        color: white !important;
+    }}
+    
+    /* Search Results */
+    .search-result {{
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        border-left: 4px solid {OSLO_COLORS['accent']};
+        transition: all 0.3s ease;
+    }}
+    
+    .search-result:hover {{
+        box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }}
+    
+    /* KPI Cards Enhanced */
+    .kpi-card {{
+        background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        text-align: center;
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    .kpi-card::before {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, {OSLO_COLORS['primary']}, {OSLO_COLORS['secondary']});
+    }}
+    
+    .kpi-value {{
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: {OSLO_COLORS['primary']};
+        margin-bottom: 0.5rem;
+    }}
+    
+    .kpi-label {{
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }}
+    
+    .kpi-delta {{
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        display: inline-block;
+    }}
+    
+    .kpi-delta.positive {{
+        background: rgba(20, 143, 119, 0.1);
+        color: {OSLO_COLORS['success']};
+    }}
+    
+    .kpi-delta.warning {{
+        background: rgba(243, 156, 18, 0.1);
+        color: {OSLO_COLORS['warning']};
     }}
     
     /* Sidebar Styling */
@@ -839,23 +940,34 @@ def create_premium_header():
 def create_premium_metric(title, value, delta, delta_type="positive"):
     """Create premium metric card"""
     return f"""
-    <div class="metric-card">
-        <div class="metric-number">{value}</div>
-        <div class="metric-label">{title}</div>
-        <div class="metric-delta {delta_type}">{delta}</div>
+    <div class="kpi-card">
+        <div class="kpi-value">{value}</div>
+        <div class="kpi-label">{title}</div>
+        <div class="kpi-delta {delta_type}">{delta}</div>
     </div>
     """
 
 
 def create_status_badge(status):
     """Create status badge"""
-    status_class = status.lower().replace(' ', '-').replace('å', 'a').replace('ø', 'o')
+    # Normalize status for CSS class
+    status_class = status.lower().replace(' ', '-').replace('å', 'a').replace('ø', 'o').replace('æ', 'ae')
     return f'<span class="status-badge status-{status_class}">{status}</span>'
 
 
-def create_tag(tag):
+def create_tag(tag_text):
     """Create tag element"""
-    return f'<span class="tag">{tag.strip()}</span>'
+    if not tag_text or tag_text.strip() == '':
+        return ''
+    return f'<span class="tag">{tag_text.strip()}</span>'
+
+
+def create_document_link(url, text="View Document"):
+    """Create styled document link"""
+    if not url or not url.startswith('http'):
+        return f'<span style="color: #ccc; font-style: italic;">Link not available</span>'
+    
+    return f'<a href="{url}" target="_blank" class="document-link">{text} →</a>'
 
 
 def create_premium_app():
@@ -1067,15 +1179,7 @@ def render_categories_page():
                             {create_status_badge(doc['status'])}
                             {''.join([create_tag(tag) for tag in doc['tags'].split(',')[:3]])}
                         </div>
-                        <a href="{doc['url']}" target="_blank" style="
-                            background: {category['color']}; 
-                            color: white; 
-                            padding: 0.4rem 0.8rem; 
-                            border-radius: 15px; 
-                            text-decoration: none; 
-                            font-size: 0.8rem;
-                            font-weight: 600;
-                        ">View →</a>
+                        {create_document_link(doc['url'], "View →")}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1156,16 +1260,7 @@ def render_categories_page():
                         {create_status_badge(doc['status'])}
                         {''.join([create_tag(tag) for tag in doc['tags'].split(',')[:4]])}
                     </div>
-                    <a href="{doc['url']}" target="_blank" style="
-                        background: linear-gradient(135deg, {category_info['color']} 0%, {OSLO_COLORS['secondary']} 100%); 
-                        color: white; 
-                        padding: 0.5rem 1rem; 
-                        border-radius: 20px; 
-                        text-decoration: none; 
-                        font-size: 0.9rem;
-                        font-weight: 600;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                    ">View Document →</a>
+                    {create_document_link(doc['url'], "View Document")}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -1260,15 +1355,7 @@ def render_smart_search():
                             {create_status_badge(doc['status'])}
                             {''.join([create_tag(tag) for tag in doc['tags'].split(',')[:4]])}
                         </div>
-                        <a href="{doc['url']}" target="_blank" style="
-                            background: linear-gradient(135deg, {OSLO_COLORS['primary']} 0%, {OSLO_COLORS['secondary']} 100%); 
-                            color: white; 
-                            padding: 0.5rem 1rem; 
-                            border-radius: 20px; 
-                            text-decoration: none; 
-                            font-size: 0.9rem;
-                            font-weight: 600;
-                        ">View Document →</a>
+                        {create_document_link(doc['url'], "View Document")}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
