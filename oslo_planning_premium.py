@@ -1286,7 +1286,7 @@ def render_analytics_premium():
             title="Department Distribution"
         )
         fig_dept.update_layout(height=400)
-        st.plotly_chart(fig_dept, use_container_width=True)
+        st.plotly_chart(fig_dept, use_container_width=True, key='main_dept_chart')
     
     with col2:
         st.markdown("### 📊 Document Types")
@@ -1301,7 +1301,7 @@ def render_analytics_premium():
             )
         ])
         fig_types.update_layout(height=400, title="Document Type Distribution")
-        st.plotly_chart(fig_types, use_container_width=True)
+        st.plotly_chart(fig_types, use_container_width=True, key='main_types_chart')
     
     # Timeline Analysis
     st.markdown("### 📅 Publication Timeline")
@@ -1318,7 +1318,7 @@ def render_analytics_premium():
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     fig_timeline.update_layout(height=400)
-    st.plotly_chart(fig_timeline, use_container_width=True)
+    st.plotly_chart(fig_timeline, use_container_width=True, key='main_timeline_chart')
     
     # Priority vs Category Analysis
     st.markdown("### 🎯 Priority Matrix")
@@ -1340,7 +1340,7 @@ def render_analytics_premium():
         title="Priority Distribution Across Categories"
     )
     fig_matrix.update_layout(height=500)
-    st.plotly_chart(fig_matrix, use_container_width=True)
+    st.plotly_chart(fig_matrix, use_container_width=True, key='main_matrix_chart')
 
 
 def render_verification_premium():
@@ -1452,7 +1452,7 @@ def render_verification_premium():
                 color=quality_dist.values,
                 color_continuous_scale='Greens'
             )
-            st.plotly_chart(fig_quality, use_container_width=True)
+            st.plotly_chart(fig_quality, use_container_width=True, key='quality_analysis_chart')
         
         with col2:
             st.markdown("#### 🔗 URL Status")
@@ -1463,7 +1463,7 @@ def render_verification_premium():
                 names=url_status.index,
                 title="URL Availability"
             )
-            st.plotly_chart(fig_url, use_container_width=True)
+            st.plotly_chart(fig_url, use_container_width=True, key='url_analysis_chart')
         
         st.markdown("#### 📋 Detailed Verification Results")
         st.dataframe(verification_df, use_container_width=True)
@@ -1599,7 +1599,7 @@ def render_administration():
                 color_continuous_scale='Greens'
             )
             fig_perf.update_layout(height=400)
-            st.plotly_chart(fig_perf, use_container_width=True)
+            st.plotly_chart(fig_perf, use_container_width=True, key='performance_analysis_chart')
         
         with col2:
             st.markdown("#### 📊 Performance Summary")

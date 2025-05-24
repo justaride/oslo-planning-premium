@@ -390,7 +390,7 @@ def create_premium_category_overview(all_docs, categories):
                     plot_bgcolor='rgba(0,0,0,0)'
                 )
                 
-                st.plotly_chart(fig_mini, use_container_width=True, config={'displayModeBar': False})
+                st.plotly_chart(fig_mini, use_container_width=True, config={'displayModeBar': False}, key=f'mini_chart_{category}')
 
 def create_premium_analytics_dashboard(all_docs, categories):
     """Create comprehensive analytics dashboard"""
@@ -419,7 +419,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 font_family="Arial",
                 title_font_size=16
             )
-            st.plotly_chart(fig_dept, use_container_width=True)
+            st.plotly_chart(fig_dept, use_container_width=True, key='analytics_dept_chart')
         
         with col2:
             # Priority distribution
@@ -443,7 +443,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 font_family="Arial",
                 title_font_size=16
             )
-            st.plotly_chart(fig_priority, use_container_width=True)
+            st.plotly_chart(fig_priority, use_container_width=True, key='analytics_priority_chart')
     
     with tab2:
         # Performance metrics
@@ -470,7 +470,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 color_continuous_scale='Greens'
             )
             fig_completion.update_layout(height=400)
-            st.plotly_chart(fig_completion, use_container_width=True)
+            st.plotly_chart(fig_completion, use_container_width=True, key='analytics_completion_chart')
         
         with col2:
             # Status breakdown with enhanced styling
@@ -494,7 +494,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
                 font_family="Arial",
                 title_font_size=16
             )
-            st.plotly_chart(fig_status, use_container_width=True)
+            st.plotly_chart(fig_status, use_container_width=True, key='analytics_status_chart')
     
     with tab3:
         # Timeline analysis
@@ -510,7 +510,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
             color_discrete_sequence=px.colors.qualitative.Set3
         )
         fig_timeline.update_layout(height=500)
-        st.plotly_chart(fig_timeline, use_container_width=True)
+        st.plotly_chart(fig_timeline, use_container_width=True, key='analytics_timeline_chart')
         
         # Recent activity
         st.markdown("#### 🔄 Recent Activity")
@@ -549,7 +549,7 @@ def create_premium_analytics_dashboard(all_docs, categories):
             title="📊 Category vs Status Matrix"
         )
         fig_matrix.update_layout(height=500)
-        st.plotly_chart(fig_matrix, use_container_width=True)
+        st.plotly_chart(fig_matrix, use_container_width=True, key='analytics_matrix_chart')
 
 def create_document_verification_system(all_docs):
     """Create comprehensive document verification system"""
