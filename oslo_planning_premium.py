@@ -46,6 +46,17 @@ try:
 except ImportError:
     PLANNING_GUIDE_AVAILABLE = False
 
+# Import Advanced Design System
+try:
+    from oslo_design_system import (
+        inject_advanced_css, create_hero_section, create_modern_metric_card,
+        create_feature_showcase_card, create_status_badge, create_modern_plotly_theme,
+        OSLO_DESIGN
+    )
+    DESIGN_SYSTEM_AVAILABLE = True
+except ImportError:
+    DESIGN_SYSTEM_AVAILABLE = False
+
 # Professional color palette
 OSLO_COLORS = {
     'primary': '#1B4F72',      # Oslo blue
@@ -1063,6 +1074,10 @@ def create_premium_app():
         }
     )
     
+    # Inject advanced CSS design system
+    if DESIGN_SYSTEM_AVAILABLE:
+        inject_advanced_css()
+    
     # Apply premium styling
     apply_premium_styling()
     
@@ -1172,8 +1187,15 @@ def create_premium_app():
 def render_executive_dashboard():
     """Render premium executive dashboard"""
     
-    st.markdown("## 📊 Executive Planning Intelligence Dashboard")
-    st.markdown("*Real-time insights into Oslo's comprehensive planning landscape*")
+    if DESIGN_SYSTEM_AVAILABLE:
+        create_hero_section(
+            "📊 Executive Dashboard",
+            "Planning Intelligence Hub",
+            "Real-time insights into Oslo's comprehensive planning landscape with advanced analytics and AI-powered intelligence"
+        )
+    else:
+        st.markdown("## 📊 Executive Planning Intelligence Dashboard")
+        st.markdown("*Real-time insights into Oslo's comprehensive planning landscape*")
     
     all_docs = st.session_state.oslo_premium.get_all_documents()
     categories = st.session_state.oslo_premium.get_categories()
@@ -1200,6 +1222,111 @@ def render_executive_dashboard():
     # Enhanced KPI Cards and Category Overview
     if ENHANCEMENTS_AVAILABLE:
         create_enhanced_kpi_cards(all_docs)
+        st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Modern Dashboard Metrics with Advanced Design
+    if DESIGN_SYSTEM_AVAILABLE and len(all_docs) > 0:
+        st.markdown("### 🎯 Key Performance Indicators")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        completed_docs = len(all_docs[all_docs['status'] == 'Vedtatt'])
+        completion_rate = (completed_docs / len(all_docs) * 100) if len(all_docs) > 0 else 0
+        avg_priority = round(all_docs['priority'].mean(), 1) if len(all_docs) > 0 else 0
+        unique_departments = all_docs['responsible_department'].nunique() if len(all_docs) > 0 else 0
+        
+        with col1:
+            st.markdown(create_modern_metric_card(
+                "Total Documents", 
+                str(len(all_docs)), 
+                "Verified planning documents", 
+                "📋", 
+                "primary",
+                "+5% vs last update"
+            ), unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(create_modern_metric_card(
+                "Completion Rate", 
+                f"{completion_rate:.0f}%", 
+                "Documents completed", 
+                "✅", 
+                "success",
+                f"+{completed_docs} completed"
+            ), unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(create_modern_metric_card(
+                "Avg Priority", 
+                str(avg_priority), 
+                "Strategic importance", 
+                "⭐", 
+                "warning",
+                "High focus areas"
+            ), unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(create_modern_metric_card(
+                "Departments", 
+                str(unique_departments), 
+                "Involved departments", 
+                "🏢", 
+                "info",
+                "Cross-departmental"
+            ), unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Feature Showcase Section
+        st.markdown("### 🚀 Platform Capabilities")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(create_feature_showcase_card(
+                "AI Planning System",
+                "Advanced AI-powered analysis for intelligent planning decisions",
+                "🤖",
+                [
+                    "Automated risk assessment",
+                    "Stakeholder identification", 
+                    "Regulatory compliance",
+                    "Timeline optimization",
+                    "Performance insights"
+                ],
+                "primary"
+            ), unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(create_feature_showcase_card(
+                "Planning Guide",
+                "Interactive hierarchy of all Oslo planning documents",
+                "📋",
+                [
+                    "Juridisk bindende planer",
+                    "Kommunale normer",
+                    "Strategic guidelines",
+                    "Practical workflow",
+                    "Expert contacts"
+                ],
+                "success"
+            ), unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(create_feature_showcase_card(
+                "Analytics & Export",
+                "Comprehensive data analysis and export capabilities",
+                "📊",
+                [
+                    "Interactive visualizations",
+                    "Multi-format export",
+                    "Real-time insights",
+                    "Performance tracking",
+                    "Custom reporting"
+                ],
+                "info"
+            ), unsafe_allow_html=True)
+        
         st.markdown("<br>", unsafe_allow_html=True)
         # Category overview with fixed HTML rendering
         st.markdown("### 📁 Category Intelligence Overview")
