@@ -39,6 +39,13 @@ try:
 except ImportError:
     AI_SYSTEM_AVAILABLE = False
 
+# Import Planning Guide
+try:
+    from oslo_planning_guide import render_planning_guide
+    PLANNING_GUIDE_AVAILABLE = True
+except ImportError:
+    PLANNING_GUIDE_AVAILABLE = False
+
 # Professional color palette
 OSLO_COLORS = {
     'primary': '#1B4F72',      # Oslo blue
@@ -1092,6 +1099,7 @@ def create_premium_app():
             "🔍 Smart Search": "Advanced document search",
             "📈 Advanced Analytics": "Deep data analysis",
             "🤖 AI Planning System": "AI-powered planning intelligence",
+            "📋 Planning Guide": "Interactive planning hierarchy",
             "✅ System Verification": "Quality control",
             "⚙️ Administration": "System management"
         }
@@ -1123,6 +1131,7 @@ def create_premium_app():
         st.markdown("### 📊 Quick Stats")
         st.markdown(create_premium_metric("Total Documents", len(all_docs), "✅ Verified", "positive"), unsafe_allow_html=True)
         st.markdown(create_premium_metric("Categories", len(categories), "🎯 Complete", "positive"), unsafe_allow_html=True)
+        st.markdown(create_premium_metric("Planning Guide", "Integrated", "📋 Active", "positive"), unsafe_allow_html=True)
         st.markdown(create_premium_metric("Active Plans", len(all_docs[all_docs['status'] == 'Vedtatt']), "📋 Current", "positive"), unsafe_allow_html=True)
         
         # System status
@@ -1149,6 +1158,11 @@ def create_premium_app():
             render_ai_planning_interface()
         else:
             st.error("❌ AI Planning System not available. Please ensure oslo_ai_planning_system.py is installed.")
+    elif page == "📋 Planning Guide":
+        if PLANNING_GUIDE_AVAILABLE:
+            render_planning_guide()
+        else:
+            st.error("❌ Planning Guide not available. Please ensure oslo_planning_guide.py is installed.")
     elif page == "✅ System Verification":
         render_verification_premium()
     elif page == "⚙️ Administration":
