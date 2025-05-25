@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Oslo Planning Guide - Interactive Planning Document Hierarchy
-Comprehensive guide for navigating Oslo's planning framework
+Natural State Planning Guide - Interactive Planning Document Hierarchy
+Community-focused guide for transparent and participatory planning in Oslo
 """
 
 import streamlit as st
@@ -16,8 +16,8 @@ from oslo_planning_premium import OSLO_COLORS
 def render_planning_guide():
     """Render the comprehensive Oslo Planning Guide"""
     
-    st.markdown("## 📋 Oslo Planleggingsguide - Dokumenthierarki")
-    st.markdown("*Interaktiv guide for navigering i Oslos planverk*")
+    st.markdown("## 🌱 Natural State Planleggingsguide")
+    st.markdown("*La oss bygge Oslo for folket - transparent og deltagelsesbasert planlegging*")
     
     # Header with key information
     st.markdown(f"""

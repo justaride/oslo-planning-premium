@@ -11,20 +11,20 @@ from datetime import datetime
 
 # Enhanced Oslo Design System
 OSLO_DESIGN = {
-    # Color Palette - Expanded and refined
+    # Color Palette - Natural State (Green-focused)
     'colors': {
-        'primary': '#1B4F72',
-        'primary_light': '#2E6DA4',
-        'primary_dark': '#0F2A44',
-        'secondary': '#2E86AB',
-        'secondary_light': '#4A9BC1',
-        'secondary_dark': '#1A5F7A',
+        'primary': '#148F77',
+        'primary_light': '#1ABC9C',
+        'primary_dark': '#0F6B5A',
+        'secondary': '#27AE60',
+        'secondary_light': '#2ECC71',
+        'secondary_dark': '#1E8449',
         'accent': '#A23B72',
         'accent_light': '#B8518A',
         'accent_dark': '#7A2C54',
-        'success': '#148F77',
-        'success_light': '#1ABC9C',
-        'success_dark': '#0F6B5A',
+        'success': '#27AE60',
+        'success_light': '#2ECC71',
+        'success_dark': '#1E8449',
         'warning': '#F39C12',
         'warning_light': '#F5B041',
         'warning_dark': '#D68910',

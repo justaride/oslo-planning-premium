@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Oslo AI Planning System - Advanced AI-Powered Planning Analysis
-Comprehensive planning intelligence with automated analysis and prediction
+Natural State AI Planning System - Community-Focused Planning Intelligence
+Transparent AI-powered analysis for participatory urban development
 """
 
 import streamlit as st
@@ -946,16 +946,16 @@ def render_ai_planning_interface():
     if 'ai_system' not in st.session_state:
         st.session_state.ai_system = OsloAIPlanningSystem()
     
-    st.markdown("## 🤖 AI Planning Intelligence System")
-    st.markdown("*Advanced AI-powered planning analysis and optimization*")
+    st.markdown("## 🌱 Natural State AI Planning")
+    st.markdown("*Community-focused AI analysis for transparent urban development*")
     
     # Premium header with AI branding
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1B4F72 0%, #2E86AB 50%, #A23B72 100%);
+    <div style="background: linear-gradient(135deg, #148F77 0%, #27AE60 50%, #2ECC71 100%);
                 padding: 2rem; border-radius: 15px; margin-bottom: 2rem; color: white; text-align: center;">
-        <h2 style="margin: 0; font-size: 2.5rem;">🤖 Oslo AI Planning</h2>
+        <h2 style="margin: 0; font-size: 2.5rem;">🌱 Natural State AI</h2>
         <p style="margin: 0.5rem 0 0 0; font-size: 1.1rem; opacity: 0.9;">
-            Intelligent planning analysis powered by advanced AI algorithms
+            Community-focused AI for transparent and participatory planning
         </p>
     </div>
     """, unsafe_allow_html=True)

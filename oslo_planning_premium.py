@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Oslo Planning Documents - Premium Professional Interface
-Complete redesign with verified documents and enhanced UI/UX
+Natural State - La oss Bygge Oslo for folket!
+Community-focused planning platform with transparency and participation
 """
 
 import json
@@ -1021,7 +1021,7 @@ def create_premium_header():
     """Create premium header"""
     st.markdown(f"""
     <div class="premium-header">
-        <h1>🏛️ Oslo Planning Documents</h1>
+        <h1>🌱 Natural State - Bygge Oslo for folket!</h1>
         <p>Premium Professional Planning Intelligence Platform</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1061,16 +1061,16 @@ def create_document_link(url, text="View Document"):
 
 
 def create_premium_app():
-    """Create the premium Oslo Planning Documents application"""
+    """Create the Natural State community planning application"""
     
     st.set_page_config(
-        page_title="Oslo Planning Documents - Premium",
-        page_icon="🏛️",
+        page_title="Natural State - La oss Bygge Oslo for folket!",
+        page_icon="🌱",
         layout="wide",
         initial_sidebar_state="expanded",
         menu_items={
-            'Get Help': 'https://oslo.kommune.no',
-            'About': "Oslo Planning Documents - Premium Professional Interface"
+            'Get Help': 'https://natural-state.no',
+            'About': "Natural State - La oss Bygge Oslo for folket! Community-focused planning platform"
         }
     )
     
@@ -1097,13 +1097,13 @@ def create_premium_app():
     with st.sidebar:
         st.markdown("""
         <div class="nav-card">
-            <h3 style="margin: 0; color: #1B4F72; display: flex; align-items: center;">
-                🏛️ Oslo Planning
+            <h3 style="margin: 0; color: #148F77; display: flex; align-items: center;">
+                🌱 Natural State
             </h3>
             <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #666;">
-                Professional Intelligence Platform
+                La oss Bygge Oslo for folket!
             </p>
-            <div style="background: linear-gradient(90deg, #1B4F72, #2E86AB); height: 2px; margin-top: 0.5rem; border-radius: 1px;"></div>
+            <div style="background: linear-gradient(90deg, #148F77, #1ABC9C); height: 2px; margin-top: 0.5rem; border-radius: 1px;"></div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1189,9 +1189,9 @@ def render_executive_dashboard():
     
     if DESIGN_SYSTEM_AVAILABLE:
         create_hero_section(
-            "📊 Executive Dashboard",
-            "Planning Intelligence Hub",
-            "Real-time insights into Oslo's comprehensive planning landscape with advanced analytics and AI-powered intelligence"
+            "🌱 Natural State Dashboard",
+            "La oss Bygge Oslo for folket!",
+            "Community-focused planning intelligence with transparency, participation, and sustainable development at its core"
         )
     else:
         st.markdown("## 📊 Executive Planning Intelligence Dashboard")
@@ -1425,9 +1425,9 @@ def render_executive_dashboard():
         border-radius: 15px;
         text-align: center;
     ">
-        <h4>🏛️ Oslo Planning Documents - Premium</h4>
-        <p>Professional Planning Intelligence Platform</p>
-        <small>© 2024 Oslo Kommune • All documents remain property of Oslo Kommune</small>
+        <h4>🌱 Natural State - La oss Bygge Oslo for folket!</h4>
+        <p>Community-Focused Planning Intelligence Platform</p>
+        <small>© 2024 Natural State • Building Oslo together with the people • All documents remain property of Oslo Kommune</small>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2190,7 +2190,7 @@ def render_administration():
                             "generated_at": datetime.now().isoformat(),
                             "export_scope": export_scope,
                             "total_documents": len(export_data),
-                            "source": "Oslo Planning Premium"
+                            "source": "Natural State - Oslo Planning"
                         },
                         "documents": export_data.to_dict('records')
                     }

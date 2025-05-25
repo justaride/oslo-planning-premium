@@ -1,6 +1,6 @@
-# Oslo Planning Premium + AI System 🏛️🤖
+# Natural State - La oss Bygge Oslo for folket! 🌱🤖
 
-A comprehensive planning intelligence platform for Oslo Kommune, featuring advanced AI-powered analysis and premium document management capabilities.
+A community-focused planning intelligence platform for Oslo, featuring transparent decision-making, citizen participation, and sustainable urban development.
 
 ## 🚀 Features
 
@@ -57,4 +57,6 @@ streamlit run oslo_planning_premium.py
 
 ---
 
-**Made for Oslo Kommune planning professionals**
+**Natural State - Building Oslo together with the people**
+
+*Empowering community-driven urban development through transparency, participation, and sustainable planning*
