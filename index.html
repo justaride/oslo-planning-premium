@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiv Analyse: Byggesaksprosessen i Norge - Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: 14, 165, 233;
+            --primary-dark: 12, 74, 110;
+            --accent: 251, 146, 60;
+            --bg-light: 248, 250, 252;
+            --bg-dark: 15, 23, 42;
+            --text-light: 51, 65, 85;
+            --text-dark: 226, 232, 240;
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: rgb(var(--bg-light));
+            color: rgb(var(--text-light));
+        }
+
+        body.dark {
+            background: rgb(var(--bg-dark));
+            color: rgb(var(--text-dark));
+        }
+
+        .dark .text-gray-700 { color: rgb(226, 232, 240); }
+        .dark .text-gray-600 { color: rgb(203, 213, 225); }
+        .dark .text-gray-800 { color: rgb(241, 245, 249); }
+        .dark .bg-white { background: rgb(30, 41, 59); }
+        .dark .bg-gray-50 { background: rgb(15, 23, 42); }
+        .dark .bg-gray-100 { background: rgb(51, 65, 85); }
+        .dark .bg-gray-200 { background: rgb(71, 85, 105); }
+        .dark .border-gray-200 { border-color: rgb(71, 85, 105); }
+        .dark .hover\:bg-gray-100:hover { background: rgb(51, 65, 85); }
+        .dark .hover\:bg-gray-200:hover { background: rgb(71, 85, 105); }
+
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glassmorphism {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 100%);
+        }
+
+        .nav-item {
+            @apply px-4 py-2 text-sm font-medium rounded-lg cursor-pointer relative overflow-hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-item:hover::before {
+            left: 100%;
+        }
+
+        .nav-item.active {
+            @apply text-white;
+            background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 100%);
+            box-shadow: 0 4px 15px rgba(var(--primary), 0.3);
+        }
+
+        .content-section {
+            @apply hidden p-6 md:p-8;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            @apply block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 350px;
+        }
+
+        .process-stage {
+            @apply p-6 rounded-xl cursor-pointer text-center transform hover:scale-105;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark .process-stage {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.9), rgba(30, 41, 59, 0.7));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .process-stage:hover {
+            box-shadow: 0 12px 40px rgba(var(--primary), 0.3);
+        }
+
+        .process-stage h3 {
+            @apply text-lg font-bold mb-3;
+            background: linear-gradient(135deg, rgb(var(--primary)), rgb(var(--primary-dark)));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal {
+            @apply fixed inset-0 flex items-center justify-center p-4 z-50;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            @apply p-8 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .dark .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .tab-button {
+            @apply px-6 py-3 font-medium text-sm leading-5 rounded-lg;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            @apply text-white;
+            background: linear-gradient(135deg, rgb(var(--primary)), rgb(var(--primary-dark)));
+            box-shadow: 0 4px 15px rgba(var(--primary), 0.3);
+        }
+
+        .accordion-button {
+            @apply w-full text-left px-6 py-4 rounded-lg font-medium flex justify-between items-center;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dark .accordion-button {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .accordion-button:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(var(--primary), 0.2);
+        }
+
+        .accordion-content {
+            @apply hidden px-6 py-4 mt-2 rounded-lg;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .accordion-content {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card {
+            @apply p-6 rounded-xl;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark .card {
+            background: rgba(51, 65, 85, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(var(--primary), 0.2);
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, rgb(var(--primary)), rgb(var(--primary-dark)));
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            @apply p-6 rounded-xl;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 45%;
+            transition: all 0.3s ease;
+        }
+
+        .dark .timeline-content {
+            background: rgba(51, 65, 85, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(var(--primary), 0.3);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: rgb(var(--primary));
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(var(--primary), 0.5);
+            z-index: 1;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            @apply w-full px-6 py-4 rounded-xl text-lg;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(var(--primary), 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .dark .search-input {
+            background: rgba(30, 41, 59, 0.9);
+            color: rgb(var(--text-dark));
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgb(var(--primary));
+            box-shadow: 0 0 20px rgba(var(--primary), 0.3);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(var(--primary), 0.3);
+            border-radius: 50%;
+            border-top-color: rgb(var(--primary));
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+            border-bottom: 2px dotted rgb(var(--primary));
+        }
+
+        .tooltip-content {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-5px);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .tooltip:hover .tooltip-content {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        .progress-bar {
+            @apply w-full h-2 rounded-full overflow-hidden;
+            background: rgba(var(--primary), 0.2);
+        }
+
+        .progress-fill {
+            @apply h-full rounded-full;
+            background: linear-gradient(90deg, rgb(var(--primary)), rgb(var(--primary-dark)));
+            transition: width 0.5s ease;
+        }
+
+        .theme-toggle {
+            @apply p-3 rounded-full cursor-pointer;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+            box-shadow: 0 0 20px rgba(var(--accent), 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .timeline-line { left: 20px; }
+            .timeline-item { flex-direction: column !important; align-items: flex-start; }
+            .timeline-content { width: calc(100% - 40px); margin-left: 40px; }
+            .timeline-dot { left: 20px; }
+        }
+
+        .faq-item {
+            @apply mb-4 rounded-xl overflow-hidden;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dark .faq-item {
+            background: rgba(51, 65, 85, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calculator-input {
+            @apply w-full px-4 py-3 rounded-lg;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(var(--primary), 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .dark .calculator-input {
+            background: rgba(30, 41, 59, 0.5);
+            color: rgb(var(--text-dark));
+        }
+
+        .calculator-input:focus {
+            outline: none;
+            border-color: rgb(var(--primary));
+            box-shadow: 0 0 10px rgba(var(--primary), 0.3);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 dark:from-gray-900 dark:to-slate-900">
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
+        <div class="text-center">
+            <div class="loading-spinner w-16 h-16 mx-auto mb-4"></div>
+            <p class="text-lg font-medium">Laster inn byggesaksanalysen...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="glassmorphism sticky top-0 z-40 shadow-lg">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-4">
+                    <div class="floating">
+                        <i class="fas fa-building text-3xl gradient-bg bg-clip-text text-transparent"></i>
+                    </div>
+                    <span class="font-bold text-2xl gradient-bg bg-clip-text text-transparent">Byggesaksanalyse Pro</span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="theme-toggle">
+                        <i class="fas fa-moon text-gray-700 dark:text-gray-300"></i>
+                    </button>
+                    
+                    <div class="md:hidden">
+                        <button id="mobile-menu-button" class="text-gray-700 dark:text-gray-300 hover:text-sky-600 focus:outline-none">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <nav class="hidden md:flex space-x-2" id="desktop-nav">
+                    <a data-section="hovedside" class="nav-item active">
+                        <i class="fas fa-home mr-2"></i>Hjem
+                    </a>
+                    <a data-section="prosessen" class="nav-item">
+                        <i class="fas fa-project-diagram mr-2"></i>Prosessen
+                    </a>
+                    <a data-section="tid-utfordringer" class="nav-item">
+                        <i class="fas fa-clock mr-2"></i>Tid
+                    </a>
+                    <a data-section="lovverk-roller" class="nav-item">
+                        <i class="fas fa-gavel mr-2"></i>Lovverk
+                    </a>
+                    <a data-section="digitalisering" class="nav-item">
+                        <i class="fas fa-laptop-code mr-2"></i>Digital
+                    </a>
+                    <a data-section="kalkulator" class="nav-item">
+                        <i class="fas fa-calculator mr-2"></i>Kalkulator
+                    </a>
+                    <a data-section="faq" class="nav-item">
+                        <i class="fas fa-question-circle mr-2"></i>FAQ
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden glassmorphism border-t border-gray-200 dark:border-gray-700">
+            <nav class="px-4 py-4 space-y-2">
+                <a data-section="hovedside" class="block nav-item active">
+                    <i class="fas fa-home mr-2"></i>Hjem
+                </a>
+                <a data-section="prosessen" class="block nav-item">
+                    <i class="fas fa-project-diagram mr-2"></i>Prosessen
+                </a>
+                <a data-section="tid-utfordringer" class="block nav-item">
+                    <i class="fas fa-clock mr-2"></i>Tid & Utfordringer
+                </a>
+                <a data-section="lovverk-roller" class="block nav-item">
+                    <i class="fas fa-gavel mr-2"></i>Lovverk & Roller
+                </a>
+                <a data-section="digitalisering" class="block nav-item">
+                    <i class="fas fa-laptop-code mr-2"></i>Digitalisering
+                </a>
+                <a data-section="kalkulator" class="block nav-item">
+                    <i class="fas fa-calculator mr-2"></i>Kalkulator
+                </a>
+                <a data-section="faq" class="block nav-item">
+                    <i class="fas fa-question-circle mr-2"></i>FAQ
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar fixed top-20 left-0 right-0 z-30">
+        <div id="readingProgress" class="progress-fill" style="width: 0%"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 mt-4">
+        
+        <!-- Search Section -->
+        <div class="search-container mb-8">
+            <div class="relative">
+                <input type="text" id="searchInput" class="search-input" placeholder="Søk i innholdet... (f.eks. 'mangelbrev', 'dispensasjon', 'saksbehandlingstid')">
+                <i class="fas fa-search absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <div id="searchResults" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Home Section -->
+        <section id="hovedside" class="content-section active">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-bg bg-clip-text text-transparent">
+                    Byggesaksprosessen i Norge
+                </h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    En interaktiv og omfattende analyse av reguleringssystemet, utfordringer og muligheter
+                </p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="card text-center transform hover:scale-105">
+                    <i class="fas fa-clock text-4xl text-amber-500 mb-4"></i>
+                    <h3 class="text-3xl font-bold text-amber-600 mb-2">~6 år</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Total tid fra første møte til byggestart i storbyer</p>
+                </div>
+                <div class="card text-center transform hover:scale-105">
+                    <i class="fas fa-file-alt text-4xl text-red-500 mb-4"></i>
+                    <h3 class="text-3xl font-bold text-red-600 mb-2">57%</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Søknader i Oslo/Akershus med mangelbrev</p>
+                </div>
+                <div class="card text-center transform hover:scale-105">
+                    <i class="fas fa-chart-line text-4xl text-green-500 mb-4"></i>
+                    <h3 class="text-3xl font-bold text-green-600 mb-2">26%</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Omgjøringsprosent klagesaker Bærum 2024</p>
+                </div>
+            </div>
+
+            <!-- Interactive Timeline Preview -->
+            <div class="card mb-12">
+                <h2 class="text-2xl font-bold mb-6 gradient-bg bg-clip-text text-transparent">
+                    <i class="fas fa-route mr-3"></i>Din Vei Gjennom Byggesaksprosessen
+                </h2>
+                <div class="timeline-container">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="font-bold text-lg mb-2">Start</h3>
+                            <p class="text-sm">Første møte med kommunen</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="font-bold text-lg mb-2">Planlegging</h3>
+                            <p class="text-sm">Utarbeide søknad og dokumentasjon</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="font-bold text-lg mb-2">Behandling</h3>
+                            <p class="text-sm">Kommunal saksbehandling</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="font-bold text-lg mb-2">Byggestart</h3>
+                            <p class="text-sm">Godkjenning og igangsetting</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Cards -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card group cursor-pointer" onclick="setActiveSection('prosessen')">
+                    <i class="fas fa-sitemap text-3xl text-sky-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-xl font-bold mb-2">Prosessen Steg for Steg</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Utforsk hver fase i byggesaksprosessen med interaktive elementer</p>
+                </div>
+                
+                <div class="card group cursor-pointer" onclick="setActiveSection('kalkulator')">
+                    <i class="fas fa-calculator text-3xl text-green-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-xl font-bold mb-2">Kost/Tid Kalkulator</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Beregn estimert tid og kostnader for ditt byggeprosjekt</p>
+                </div>
+                
+                <div class="card group cursor-pointer" onclick="setActiveSection('faq')">
+                    <i class="fas fa-question-circle text-3xl text-purple-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-xl font-bold mb-2">Ofte Stilte Spørsmål</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Få svar på vanlige spørsmål om byggesaksprosessen</p>
+                </div>
+                
+                <div class="card">
+                    <i class="fas fa-chart-bar text-3xl text-orange-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Interaktive Analyser</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Visualiseringer og data om saksbehandlingstider og statistikk</p>
+                </div>
+                
+                <div class="card">
+                    <i class="fas fa-book text-3xl text-indigo-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Ordforklaringer</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Tekniske termer forklart med 
+                        <span class="tooltip">tooltips
+                            <span class="tooltip-content">Slik som dette!</span>
+                        </span>
+                    </p>
+                </div>
+                
+                <div class="card">
+                    <i class="fas fa-download text-3xl text-pink-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Last Ned Data</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Eksporter diagrammer og data for videre analyse</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section with Enhanced Timeline -->
+        <section id="prosessen" class="content-section">
+            <h1 class="text-3xl font-bold mb-8 gradient-bg bg-clip-text text-transparent">
+                <i class="fas fa-project-diagram mr-3"></i>Byggesaksprosessens Hovedfaser
+            </h1>
+            
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">
+                Følg den interaktive tidslinjen nedenfor for å utforske hver fase i detalj. Klikk på fasene for mer informasjon.
+            </p>
+
+            <!-- Interactive Process Timeline -->
+            <div class="timeline-container mb-12">
+                <div class="timeline-line"></div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content cursor-pointer" data-stage="planavklaring">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600">1. Planavklaring</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Avklare planer, forhåndskonferanse, engasjere ansvarlige</p>
+                        <div class="mt-2">
+                            <span class="text-xs bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200 px-2 py-1 rounded">2-4 uker</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content cursor-pointer" data-stage="soknad">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600">2. Søknadsprosessen</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Nabovarsling, utarbeidelse og innsending av søknad</p>
+                        <div class="mt-2">
+                            <span class="text-xs bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200 px-2 py-1 rounded">3-6 uker</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content cursor-pointer" data-stage="saksbehandling">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600">3. Saksbehandling</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Kommunal behandling, kontroll og vurdering</p>
+                        <div class="mt-2">
+                            <span class="text-xs bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-1 rounded">3-12 uker</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content cursor-pointer" data-stage="vedtak">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600">4. Vedtak</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Kommunen fatter vedtak om tillatelse eller avslag</p>
+                        <div class="mt-2">
+                            <span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">1 uke</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content cursor-pointer" data-stage="klage">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600">5. Klagebehandling</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Eventuell klagebehandling fra berørte parter</p>
+                        <div class="mt-2">
+                            <span class="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded">6-12 uker</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content cursor-pointer" data-stage="gjennomforing">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600">6. Gjennomføring</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Igangsettingstillatelse, bygging og ferdigattest</p>
+                        <div class="mt-2">
+                            <span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">Varierer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Cards Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+                <div class="process-stage" data-stage="planavklaring">
+                    <i class="fas fa-map text-4xl text-sky-500 mb-4"></i>
+                    <h3>1. Planavklaring og Forberedelser</h3>
+                    <p class="text-sm">Avklare planer, forhåndskonferanse, engasjere ansvarlige foretak.</p>
+                </div>
+                <div class="process-stage" data-stage="soknad">
+                    <i class="fas fa-file-signature text-4xl text-blue-500 mb-4"></i>
+                    <h3>2. Søknadsprosessen</h3>
+                    <p class="text-sm">Nabovarsling, utarbeidelse og innsending av søknad til kommunen.</p>
+                </div>
+                <div class="process-stage" data-stage="saksbehandling">
+                    <i class="fas fa-tasks text-4xl text-indigo-500 mb-4"></i>
+                    <h3>3. Kommunal Saksbehandling</h3>
+                    <p class="text-sm">Mottak, kontroll, vurdering, dispensasjoner, uttalelser.</p>
+                </div>
+                <div class="process-stage" data-stage="vedtak">
+                    <i class="fas fa-stamp text-4xl text-green-500 mb-4"></i>
+                    <h3>4. Vedtak</h3>
+                    <p class="text-sm">Kommunen fatter vedtak: tillatelse (evt. på vilkår) eller avslag.</p>
+                </div>
+                <div class="process-stage" data-stage="klage">
+                    <i class="fas fa-balance-scale text-4xl text-orange-500 mb-4"></i>
+                    <h3>5. Klagebehandling</h3>
+                    <p class="text-sm">Rett til å klage på vedtak for tiltakshaver, naboer m.fl.</p>
+                </div>
+                <div class="process-stage" data-stage="gjennomforing">
+                    <i class="fas fa-hard-hat text-4xl text-purple-500 mb-4"></i>
+                    <h3>6. Gjennomføring og Avslutning</h3>
+                    <p class="text-sm">Igangsettingstillatelse, bygging, endringssøknad, ferdigattest.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Time and Challenges Section -->
+        <section id="tid-utfordringer" class="content-section">
+            <h1 class="text-3xl font-bold mb-8 gradient-bg bg-clip-text text-transparent">
+                <i class="fas fa-clock mr-3"></i>Tidsbruk og Effektivitetsutfordringer
+            </h1>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-4">Andel Søknader med Mangelbrev (2024)</h2>
+                    <div class="chart-container">
+                        <canvas id="mangelbrevChart"></canvas>
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button onclick="exportChart('mangelbrevChart')" class="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition">
+                            <i class="fas fa-download mr-2"></i>Last ned
+                        </button>
+                        <button onclick="shareChart('mangelbrevChart')" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                            <i class="fas fa-share mr-2"></i>Del
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-4">Saksbehandlingstid Sammenligning</h2>
+                    <div class="chart-container">
+                        <canvas id="saksbehandlingChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Gjennomsnitt for 12-ukers saker (2021)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Causes Analysis -->
+            <div class="card mb-12">
+                <h2 class="text-2xl font-bold mb-6">Årsaker til Lang Saksbehandlingstid</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <i class="fas fa-map-marked-alt text-4xl text-red-500 mb-4"></i>
+                        <h3 class="font-bold text-lg mb-2">Planrelaterte Faktorer</h3>
+                        <ul class="text-sm text-left space-y-1">
+                            <li>• Mangelfulle planforslag</li>
+                            <li>• Avvik fra overordnede planer</li>
+                            <li>• Omfattende dokumentasjonskrav</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-users text-4xl text-yellow-500 mb-4"></i>
+                        <h3 class="font-bold text-lg mb-2">Samhandlingsfaktorer</h3>
+                        <ul class="text-sm text-left space-y-1">
+                            <li>• Uklare føringer fra kommunen</li>
+                            <li>• Manglende tillit mellom aktører</li>
+                            <li>• Ressursmangel i kommuner</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-book text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="font-bold text-lg mb-2">Regelverksfaktorer</h3>
+                        <ul class="text-sm text-left space-y-1">
+                            <li>• Uklare saksbehandlingsregler</li>
+                            <li>• Tolkningsutfordringer</li>
+                            <li>• Komplekse krav</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Time Estimator -->
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-6">
+                    <i class="fas fa-hourglass-half mr-3"></i>Estimert Saksbehandlingstid
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Type prosjekt:</label>
+                        <select id="projectType" class="calculator-input mb-4">
+                            <option value="simple">Enkelt tiltak (garasje, tilbygg)</option>
+                            <option value="medium">Middels komplekst (enebolig)</option>
+                            <option value="complex">Komplekst (leilighetsbygg, næring)</option>
+                        </select>
+                        
+                        <label class="block text-sm font-medium mb-2">Kommune:</label>
+                        <select id="municipality" class="calculator-input">
+                            <option value="efficient">Effektiv kommune (< 50 dager snitt)</option>
+                            <option value="average">Gjennomsnittlig (50-100 dager)</option>
+                            <option value="slow">Treg kommune (> 100 dager)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-sky-600 mb-2" id="timeEstimate">45</div>
+                            <p class="text-gray-600 dark:text-gray-400">Estimerte dager</p>
+                            <p class="text-sm mt-2 text-amber-600">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                + mangelbrev kan forlenge
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Law and Roles Section -->
+        <section id="lovverk-roller" class="content-section">
+            <h1 class="text-3xl font-bold mb-8 gradient-bg bg-clip-text text-transparent">
+                <i class="fas fa-gavel mr-3"></i>Lovverk og Sentrale Roller
+            </h1>
+            
+            <div id="lovverk-accordion" class="space-y-4">
+                <div>
+                    <button class="accordion-button group">
+                        <span class="flex items-center">
+                            <i class="fas fa-book-open mr-3 text-sky-500 group-hover:scale-110 transition-transform"></i>
+                            Plan- og bygningsloven (PBL)
+                        </span>
+                        <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="mb-4">PBL med tilhørende forskrifter (TEK, SAK) er ryggraden i norsk arealforvaltning.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                                <h4 class="font-bold text-red-700 dark:text-red-400 mb-2">
+                                    <i class="fas fa-exclamation-circle mr-2"></i>Utfordringer
+                                </h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• <span class="tooltip">ROS-analyser<span class="tooltip-content">Risiko- og sårbarhetsanalyser</span></span> øker kompleksitet</li>
+                                    <li>• Strenge dispensasjonsvilkår</li>
+                                    <li>• Omfattende dokumentasjonskrav</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-700 dark:text-green-400 mb-2">
+                                    <i class="fas fa-check-circle mr-2"></i>Forenklingstiltak
+                                </h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• SAK10: Unntak for mindre tiltak</li>
+                                    <li>• DiBK jobber med forenklinger</li>
+                                    <li>• Måleregler under utvikling</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button class="accordion-button group">
+                        <span class="flex items-center">
+                            <i class="fas fa-shield-alt mr-3 text-green-500 group-hover:scale-110 transition-transform"></i>
+                            Ansvarsrettssystemet
+                        </span>
+                        <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="mb-4">Systemet skal sikre kvalitet gjennom ansvarlige foretak (SØK, UTF, KUT).</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold mb-2">Kritiske evalueringer:</h4>
+                            <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                                <p class="text-sm">
+                                    <i class="fas fa-info-circle text-amber-600 mr-2"></i>
+                                    Byggkvalitetutvalget (2020) mente systemet fører til "ansvarspulverisering" og foreslo avvikling.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container" style="max-width: 400px; height: 250px;">
+                            <canvas id="baerumKlageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button class="accordion-button group">
+                        <span class="flex items-center">
+                            <i class="fas fa-city mr-3 text-blue-500 group-hover:scale-110 transition-transform"></i>
+                            Kommunenes Rolle
+                        </span>
+                        <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold mb-3">Utfordringer:</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-random text-red-500 mt-1 mr-2"></i>
+                                        <span class="text-sm">Stor variasjon i praksis mellom kommuner</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-user-slash text-red-500 mt-1 mr-2"></i>
+                                        <span class="text-sm">Kompetanse- og kapasitetsmangel</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-sync text-red-500 mt-1 mr-2"></i>
+                                        <span class="text-sm">Høy turnover og kunnskapstap</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-3">Tilsynsstatistikk:</h4>
+                                <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                                    <p class="text-2xl font-bold text-sky-600">26%</p>
+                                    <p class="text-sm">Omgjøringsprosent Bærum 2024</p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                                        Høy omgjøring kan indikere utfordringer i saksbehandling
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button class="accordion-button group">
+                        <span class="flex items-center">
+                            <i class="fas fa-building mr-3 text-purple-500 group-hover:scale-110 transition-transform"></i>
+                            DiBK - Direktoratet for byggkvalitet
+                        </span>
+                        <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="mb-4">DiBK er det sentrale fagorganet for byggesaksforvaltning.</p>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <i class="fas fa-file-contract text-3xl text-blue-500 mb-2"></i>
+                                <p class="text-sm font-medium">Regelverksutvikling</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-laptop text-3xl text-green-500 mb-2"></i>
+                                <p class="text-sm font-medium">Digitalisering</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-graduation-cap text-3xl text-purple-500 mb-2"></i>
+                                <p class="text-sm font-medium">Kompetanseheving</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-search text-3xl text-orange-500 mb-2"></i>
+                                <p class="text-sm font-medium">Tilsyn</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-certificate text-3xl text-red-500 mb-2"></i>
+                                <p class="text-sm font-medium">Sentral godkjenning</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-leaf text-3xl text-green-600 mb-2"></i>
+                                <p class="text-sm font-medium">Bærekraft</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Digitalization Section -->
+        <section id="digitalisering" class="content-section">
+            <h1 class="text-3xl font-bold mb-8 gradient-bg bg-clip-text text-transparent">
+                <i class="fas fa-laptop-code mr-3"></i>Digitaliseringens Løfter og Utfordringer
+            </h1>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="card">
+                    <i class="fas fa-rocket text-4xl text-purple-500 mb-4"></i>
+                    <h2 class="text-xl font-bold mb-4">Nøkkelinitiativer</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium">Fellestjenester BYGG (FTB)</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Nasjonal plattform for byggesøknader</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium">eByggesak</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Standardisert saksbehandlingssystem</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium">ByggNett-strategi</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Heldigital kommunikasjon</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <i class="fas fa-robot text-4xl text-blue-500 mb-4"></i>
+                    <h2 class="text-xl font-bold mb-4">KI og Automatisering</h2>
+                    <div class="mb-4">
+                        <div class="progress-bar mb-2">
+                            <div class="progress-fill" style="width: 30%"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">30% - Automatisk regelsjekk implementert</p>
+                    </div>
+                    <p class="text-sm">DiBK jobber med:</p>
+                    <ul class="text-sm space-y-1 mt-2">
+                        <li>• Automatiske regelsjekkere for TEK17</li>
+                        <li>• KI-støtte til saksbehandling</li>
+                        <li>• Maskinlesbare regelformater</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-6">Digital Modenhet - Status 2024</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="relative inline-block">
+                            <svg class="w-32 h-32">
+                                <circle cx="64" cy="64" r="60" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                                <circle cx="64" cy="64" r="60" stroke="#10b981" stroke-width="8" fill="none"
+                                        stroke-dasharray="377" stroke-dashoffset="113" transform="rotate(-90 64 64)"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">70%</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 font-medium">Digital innsending</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="relative inline-block">
+                            <svg class="w-32 h-32">
+                                <circle cx="64" cy="64" r="60" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                                <circle cx="64" cy="64" r="60" stroke="#f59e0b" stroke-width="8" fill="none"
+                                        stroke-dasharray="377" stroke-dashoffset="189" transform="rotate(-90 64 64)"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">50%</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 font-medium">Digital saksbehandling</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="relative inline-block">
+                            <svg class="w-32 h-32">
+                                <circle cx="64" cy="64" r="60" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                                <circle cx="64" cy="64" r="60" stroke="#ef4444" stroke-width="8" fill="none"
+                                        stroke-dasharray="377" stroke-dashoffset="264" transform="rotate(-90 64 64)"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">30%</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 font-medium">Automatisering</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section id="kalkulator" class="content-section">
+            <h1 class="text-3xl font-bold mb-8 gradient-bg bg-clip-text text-transparent">
+                <i class="fas fa-calculator mr-3"></i>Kost/Tid Kalkulator
+            </h1>
+            
+            <div class="card max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">Beregn estimert tid og kostnader</h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Prosjektdetaljer</h3>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Type byggeprosjekt:</label>
+                            <select id="calcProjectType" class="calculator-input">
+                                <option value="garage">Garasje/carport (< 50m²)</option>
+                                <option value="addition">Tilbygg til bolig</option>
+                                <option value="house">Enebolig</option>
+                                <option value="apartment">Leilighetsbygg (2-4 enheter)</option>
+                                <option value="commercial">Næringseiendom</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Areal (m²):</label>
+                            <input type="number" id="calcArea" class="calculator-input" value="150" min="10" max="10000">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Kommune:</label>
+                            <select id="calcMunicipality" class="calculator-input">
+                                <option value="oslo">Oslo</option>
+                                <option value="bergen">Bergen</option>
+                                <option value="trondheim">Trondheim</option>
+                                <option value="small">Mindre kommune</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Dispensasjon nødvendig?</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="dispensation" value="no" checked class="mr-2">
+                                    <span>Nei</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="dispensation" value="yes" class="mr-2">
+                                    <span>Ja</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button onclick="calculateProject()" class="w-full py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition font-medium">
+                            <i class="fas fa-calculator mr-2"></i>Beregn
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Estimerte resultater</h3>
+                        
+                        <div id="calculatorResults" class="space-y-4">
+                            <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Saksbehandlingstid:</p>
+                                <p class="text-2xl font-bold text-sky-600" id="calcTime">-</p>
+                            </div>
+                            
+                            <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Byggesaksgebyr:</p>
+                                <p class="text-2xl font-bold text-green-600" id="calcFee">-</p>
+                            </div>
+                            
+                            <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Totale gebyrer (inkl. tilknytning):</p>
+                                <p class="text-2xl font-bold text-purple-600" id="calcTotal">-</p>
+                            </div>
+                            
+                            <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                                <p class="text-sm text-amber-800 dark:text-amber-200">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Dette er estimater basert på gjennomsnittsverdier. Faktiske kostnader og tidsbruk kan variere betydelig.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="content-section">
+            <h1 class="text-3xl font-bold mb-8 gradient-bg bg-clip-text text-transparent">
+                <i class="fas fa-question-circle mr-3"></i>Ofte Stilte Spørsmål
+            </h1>
+            
+            <div class="max-w-3xl mx-auto">
+                <div class="space-y-4">
+                    <div class="faq-item">
+                        <button class="w-full text-left p-6 font-medium flex justify-between items-center faq-button">
+                            <span>Hva er et mangelbrev og hvorfor får jeg det?</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="hidden p-6 pt-0 faq-content">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Et mangelbrev er en tilbakemelding fra kommunen om at søknaden din mangler nødvendig dokumentasjon eller informasjon. 
+                                Dette stopper saksbehandlingsfristen og kan betydelig forlenge prosessen. I Oslo/Akershus mottar hele 57% av søknadene mangelbrev.
+                            </p>
+                            <p class="mt-2 text-sm">
+                                <strong>Tips:</strong> Bruk forhåndskonferanse og sørg for komplett dokumentasjon ved første innsending.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="w-full text-left p-6 font-medium flex justify-between items-center faq-button">
+                            <span>Hvor lang tid tar en byggesak normalt?</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="hidden p-6 pt-0 faq-content">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Lovpålagt frist er 3 uker for enkle saker og 12 uker for komplekse saker. Men i praksis varierer det enormt:
+                            </p>
+                            <ul class="mt-2 space-y-1 text-sm">
+                                <li>• Effektive kommuner: 20-50 dager</li>
+                                <li>• Gjennomsnitt: 50-100 dager</li>
+                                <li>• Trege kommuner: Over 130 dager</li>
+                                <li>• Total tid fra start til byggestart i storbyer: Opptil 6 år</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="w-full text-left p-6 font-medium flex justify-between items-center faq-button">
+                            <span>Hva koster det å søke om byggetillatelse?</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="hidden p-6 pt-0 faq-content">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Gebyrene varierer kraftig mellom kommuner og type prosjekt:
+                            </p>
+                            <ul class="mt-2 space-y-1 text-sm">
+                                <li>• Enkel garasje: 5 000 - 15 000 kr</li>
+                                <li>• Enebolig: 30 000 - 80 000 kr</li>
+                                <li>• Leilighetsbygg: 100 000 - 500 000 kr</li>
+                                <li>• + Tilknytningsavgifter vann/avløp: 50 000 - 200 000 kr</li>
+                            </ul>
+                            <p class="mt-2 text-sm text-amber-600">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Husk også kostnader til arkitekt, rådgivere og eventuelle dispensasjoner.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="w-full text-left p-6 font-medium flex justify-between items-center faq-button">
+                            <span>Kan jeg klage på kommunens vedtak?</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="hidden p-6 pt-0 faq-content">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Ja, du har rett til å klage på vedtaket innen 3 uker. Klageprosessen går slik:
+                            </p>
+                            <ol class="mt-2 space-y-1 text-sm list-decimal list-inside">
+                                <li>Send klage til kommunen som fattet vedtaket</li>
+                                <li>Kommunen vurderer klagen på nytt</li>
+                                <li>Hvis kommunen ikke omgjør, sendes klagen til Statsforvalteren</li>
+                                <li>Statsforvalteren fatter endelig vedtak</li>
+                            </ol>
+                            <p class="mt-2 text-sm">
+                                <strong>NB:</strong> I Bærum ble 26% av klagene omgjort av Statsforvalteren i 2024.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="w-full text-left p-6 font-medium flex justify-between items-center faq-button">
+                            <span>Hva er dispensasjon og når trenger jeg det?</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="hidden p-6 pt-0 faq-content">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Dispensasjon er unntak fra gjeldende plan- eller bygningsbestemmelser. Du trenger det når:
+                            </p>
+                            <ul class="mt-2 space-y-1 text-sm">
+                                <li>• Tiltaket strider mot reguleringsplan</li>
+                                <li>• Du vil bygge i strandsonen</li>
+                                <li>• Bygget overskrider tillatte høyder/utnyttelse</li>
+                                <li>• Andre avvik fra kommuneplan eller forskrifter</li>
+                            </ul>
+                            <p class="mt-2 text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Dispensasjon gis kun når fordelene er "klart større" enn ulempene - høy terskel!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="w-full text-left p-6 font-medium flex justify-between items-center faq-button">
+                            <span>Må jeg varsle naboer, og hva skjer hvis de protesterer?</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="hidden p-6 pt-0 faq-content">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Ja, nabovarsling er lovpålagt for de fleste tiltak. Naboer har 2 uker på å komme med merknader.
+                            </p>
+                            <p class="mt-2 text-sm">
+                                Ved protester:
+                            </p>
+                            <ul class="mt-1 space-y-1 text-sm">
+                                <li>• Kommunen må vurdere alle merknader</li>
+                                <li>• Du må svare på merknadene i søknaden</li>
+                                <li>• Naboer har klagerett på vedtaket</li>
+                                <li>• Kan føre til forsinkelser og økte kostnader</li>
+                            </ul>
+                            <p class="mt-2 text-sm text-green-600">
+                                <i class="fas fa-lightbulb mr-1"></i>
+                                Tips: Dialog med naboer før varsling kan forebygge konflikter.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glassmorphism mt-16 py-8 text-center">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+            Basert på "Reguleringsprosessen for Byggesaker i Norge: En Dypere Analyse"
+        </p>
+        <div class="mt-4 flex justify-center space-x-4">
+            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-sky-600 transition">
+                <i class="fab fa-github text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-sky-600 transition">
+                <i class="fab fa-linkedin text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-sky-600 transition">
+                <i class="fas fa-envelope text-xl"></i>
+            </a>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="processModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold gradient-bg bg-clip-text text-transparent">Fasedetaljer</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="modalBody" class="space-y-4">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }, 1000);
+            
+            // Initialize theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark');
+                updateThemeIcon();
+            }
+            
+            // Set initial active section
+            setActiveSection('hovedside');
+        });
+
+        // Navigation
+        const allNavLinks = document.querySelectorAll('.nav-item');
+        const allContentSections = document.querySelectorAll('.content-section');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        let mangelbrevChartInstance = null;
+        let saksbehandlingChartInstance = null;
+        let baerumKlageChartInstance = null;
+
+        function setActiveSection(sectionId) {
+            allNavLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('data-section') === sectionId);
+            });
+            allContentSections.forEach(section => {
+                section.classList.toggle('active', section.id === sectionId);
+            });
+            window.scrollTo(0, 0);
+            
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+            
+            // Update reading progress
+            updateReadingProgress();
+            
+            // Initialize charts if needed
+            if (sectionId === 'tid-utfordringer') {
+                setTimeout(() => {
+                    renderMangelbrevChart();
+                    renderSaksbehandlingChart();
+                }, 100);
+            }
+            if (sectionId === 'lovverk-roller') {
+                setTimeout(renderBaerumKlageChart, 100);
+            }
+        }
+
+        allNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.getAttribute('data-section');
+                setActiveSection(sectionId);
+            });
+        });
+
+        // Mobile menu toggle
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            updateThemeIcon();
+        });
+
+        function updateThemeIcon() {
+            const icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('dark')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        // Reading progress
+        function updateReadingProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('readingProgress').style.width = progress + '%';
+        }
+
+        window.addEventListener('scroll', updateReadingProgress);
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            if (query.length < 2) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            // Simple search implementation - in real app would search actual content
+            const results = [
+                { title: 'Mangelbrev-praksis', section: 'tid-utfordringer', excerpt: '57% av søknader i Oslo/Akershus mottar mangelbrev...' },
+                { title: 'Dispensasjon', section: 'lovverk-roller', excerpt: 'Strenge vilkår for dispensasjon fra plan- og bygningsloven...' },
+                { title: 'Saksbehandlingstid', section: 'tid-utfordringer', excerpt: 'Gjennomsnittlig saksbehandlingstid varierer fra 1 til 134 dager...' }
+            ].filter(item => item.title.toLowerCase().includes(query) || item.excerpt.toLowerCase().includes(query));
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = `
+                    <div class="card">
+                        <h3 class="font-bold mb-3">Søkeresultater (${results.length})</h3>
+                        ${results.map(r => `
+                            <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-pointer" onclick="setActiveSection('${r.section}')">
+                                <h4 class="font-medium">${r.title}</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">${r.excerpt}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // Charts
+        function renderMangelbrevChart() {
+            if (mangelbrevChartInstance) {
+                mangelbrevChartInstance.destroy();
+            }
+            const ctx = document.getElementById('mangelbrevChart').getContext('2d');
+            mangelbrevChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Norge', 'Akershus/Oslo', 'Troms', 'Nordland', 'Finnmark', 'Trøndelag'],
+                    datasets: [{
+                        label: 'Andel med mangelbrev (%)',
+                        data: [36, 57, 40, 34, 31, 28],
+                        backgroundColor: [
+                            'rgba(14, 165, 233, 0.6)',
+                            'rgba(239, 68, 68, 0.6)',
+                            'rgba(245, 158, 11, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(139, 92, 246, 0.6)',
+                            'rgba(236, 72, 153, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(14, 165, 233, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(236, 72, 153, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 60,
+                            title: { display: true, text: 'Prosent (%)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw}% av søknadene`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSaksbehandlingChart() {
+            if (saksbehandlingChartInstance) {
+                saksbehandlingChartInstance.destroy();
+            }
+            const ctx = document.getElementById('saksbehandlingChart').getContext('2d');
+            saksbehandlingChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Meløy', 'Rask kommune', 'Gjennomsnitt', 'Treg kommune', 'Vestby'],
+                    datasets: [{
+                        label: 'Dager',
+                        data: [1, 30, 65, 100, 134],
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Antall dager' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderBaerumKlageChart() {
+            if (baerumKlageChartInstance) {
+                baerumKlageChartInstance.destroy();
+            }
+            const ctx = document.getElementById('baerumKlageChart').getContext('2d');
+            baerumKlageChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Opprettholdt', 'Omgjort'],
+                    datasets: [{
+                        data: [74, 26],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(239, 68, 68, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Process modal
+        const processStages = document.querySelectorAll('[data-stage]');
+        const modal = document.getElementById('processModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const closeModalButton = document.getElementById('closeModal');
+
+        const stageDetails = {
+            planavklaring: {
+                title: "1. Planavklaring og Forberedelser",
+                content: `
+                    <div class="space-y-4">
+                        <p>Dette er den innledende fasen hvor grunnlaget for et byggeprosjekt legges.</p>
+                        
+                        <div class="bg-sky-50 dark:bg-sky-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Sentrale aktiviteter:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Overordnet planstatus:</strong> Avklare hvilke planer som gjelder for eiendommen
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Forhåndskonferanse:</strong> Frivillig møte med kommunen for avklaringer
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Prosjektering:</strong> Engasjere ansvarlige foretak (arkitekt, ingeniører)
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Typiske utfordringer:</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li>• Utdaterte overordnede planer</li>
+                                <li>• Uklare føringer fra kommunen</li>
+                                <li>• Rekkefølgekrav som involverer tredjeparter</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            soknad: {
+                title: "2. Søknadsprosessen",
+                content: `
+                    <div class="space-y-4">
+                        <p>Den formelle søknadsprosessen starter når forberedelsene er gjort.</p>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Prosessen inkluderer:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-home text-blue-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Nabovarsling:</strong> 2 ukers frist for merknader
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-file-alt text-blue-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Digital søknad:</strong> Via Fellestjenester BYGG
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-folder-open text-blue-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Dokumentasjon:</strong> Omfattende krav må oppfylles
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                            <p class="text-sm">
+                                <i class="fas fa-exclamation-triangle text-amber-600 mr-2"></i>
+                                <strong>Advarsel:</strong> 57% av søknader i Oslo/Akershus får mangelbrev!
+                            </p>
+                        </div>
+                    </div>
+                `
+            },
+            saksbehandling: {
+                title: "3. Kommunal Saksbehandling",
+                content: `
+                    <div class="space-y-4">
+                        <p>Kommunen behandler søknaden i henhold til lovpålagte frister.</p>
+                        
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Behandlingsprosess:</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center mr-3">1</div>
+                                    <span>Mottak og registrering</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center mr-3">2</div>
+                                    <span>Kompletthetssjekk</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center mr-3">3</div>
+                                    <span>Faglig vurdering</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center mr-3">4</div>
+                                    <span>Eventuell høring</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded text-center">
+                                <p class="text-2xl font-bold text-green-600">3 uker</p>
+                                <p class="text-sm">Enkle saker</p>
+                            </div>
+                            <div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded text-center">
+                                <p class="text-2xl font-bold text-orange-600">12 uker</p>
+                                <p class="text-sm">Komplekse saker</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            vedtak: {
+                title: "4. Vedtak",
+                content: `
+                    <div class="space-y-4">
+                        <p>Kommunen fatter et formelt vedtak basert på saksbehandlingen.</p>
+                        
+                        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Mulige utfall:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Tillatelse:</strong> Prosjektet godkjennes</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-exclamation text-yellow-500 mt-1 mr-3"></i>
+                                    <span><strong>Tillatelse med vilkår:</strong> Krav må oppfylles</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-times text-red-500 mt-1 mr-3"></i>
+                                    <span><strong>Avslag:</strong> Søknaden avvises</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                            <p class="text-sm">
+                                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                                Vedtaket skal alltid være skriftlig begrunnet for etterprøvbarhet.
+                            </p>
+                        </div>
+                    </div>
+                `
+            },
+            klage: {
+                title: "5. Klagebehandling",
+                content: `
+                    <div class="space-y-4">
+                        <p>Berørte parter har rett til å klage på kommunens vedtak.</p>
+                        
+                        <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Klageprosessen:</h4>
+                            <ol class="space-y-2 list-decimal list-inside">
+                                <li>Klage sendes kommunen innen 3 uker</li>
+                                <li>Kommunen vurderer klagen på nytt</li>
+                                <li>Ved opprettholdelse: Videre til Statsforvalteren</li>
+                                <li>Statsforvalteren fatter endelig vedtak</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Statistikk Bærum 2024:</h4>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-red-600">26%</p>
+                                <p class="text-sm">omgjort av Statsforvalteren</p>
+                            </div>
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Høy omgjøringsprosent kan indikere utfordringer i kommunal saksbehandling.
+                        </p>
+                    </div>
+                `
+            },
+            gjennomforing: {
+                title: "6. Gjennomføring og Avslutning",
+                content: `
+                    <div class="space-y-4">
+                        <p>Når tillatelse er gitt kan byggearbeidene starte.</p>
+                        
+                        <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Viktige milepæler:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-play-circle text-purple-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Igangsettingstillatelse:</strong> Før byggestart
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-hard-hat text-purple-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Gjennomføring:</strong> I henhold til tillatelsen
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-edit text-purple-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Endringssøknad:</strong> Ved vesentlige endringer
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-certificate text-purple-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <strong>Ferdigattest:</strong> Bekrefter samsvar
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                            <p class="text-sm">
+                                <i class="fas fa-check-double text-green-600 mr-2"></i>
+                                Ferdigattest er viktig for fremtidig salg og forsikring!
+                            </p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        processStages.forEach(stage => {
+            stage.addEventListener('click', () => {
+                const stageId = stage.getAttribute('data-stage');
+                const details = stageDetails[stageId];
+                if (details) {
+                    modalTitle.innerHTML = `<i class="fas fa-info-circle mr-3"></i>${details.title}`;
+                    modalBody.innerHTML = details.content;
+                    modal.classList.remove('hidden');
+                }
+            });
+        });
+
+        closeModalButton.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Accordion functionality
+        const accordionButtons = document.querySelectorAll('.accordion-button');
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('svg');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+                
+                if (!content.classList.contains('hidden') && button.textContent.includes('Ansvarsrettssystemet')) {
+                    setTimeout(renderBaerumKlageChart, 100);
+                }
+            });
+        });
+
+        // FAQ functionality
+        document.querySelectorAll('.faq-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('fa-chevron-up');
+                icon.classList.toggle('fa-chevron-down');
+            });
+        });
+
+        // Time estimator
+        document.getElementById('projectType').addEventListener('change', updateTimeEstimate);
+        document.getElementById('municipality').addEventListener('change', updateTimeEstimate);
+
+        function updateTimeEstimate() {
+            const projectType = document.getElementById('projectType').value;
+            const municipality = document.getElementById('municipality').value;
+            
+            let baseDays = {
+                simple: 30,
+                medium: 60,
+                complex: 90
+            }[projectType];
+            
+            let multiplier = {
+                efficient: 0.7,
+                average: 1,
+                slow: 1.5
+            }[municipality];
+            
+            const estimate = Math.round(baseDays * multiplier);
+            document.getElementById('timeEstimate').textContent = estimate;
+        }
+
+        // Calculator
+        function calculateProject() {
+            const type = document.getElementById('calcProjectType').value;
+            const area = parseInt(document.getElementById('calcArea').value);
+            const municipality = document.getElementById('calcMunicipality').value;
+            const dispensation = document.querySelector('input[name="dispensation"]:checked').value;
+            
+            // Base fees (simplified calculation)
+            let baseFee = {
+                garage: 8000,
+                addition: 15000,
+                house: 35000,
+                apartment: 80000,
+                commercial: 120000
+            }[type];
+            
+            // Area adjustment
+            baseFee += area * 50;
+            
+            // Municipality adjustment
+            const municipalityMultiplier = {
+                oslo: 1.5,
+                bergen: 1.3,
+                trondheim: 1.2,
+                small: 0.8
+            }[municipality];
+            
+            baseFee *= municipalityMultiplier;
+            
+            // Dispensation adds cost
+            if (dispensation === 'yes') {
+                baseFee *= 1.3;
+            }
+            
+            // Connection fees
+            const connectionFee = area * 300;
+            const totalFee = baseFee + connectionFee;
+            
+            // Time calculation
+            let baseTime = {
+                garage: '3-6 uker',
+                addition: '6-9 uker',
+                house: '9-12 uker',
+                apartment: '12-16 uker',
+                commercial: '16-24 uker'
+            }[type];
+            
+            if (dispensation === 'yes') {
+                baseTime += ' + 4-8 uker for dispensasjon';
+            }
+            
+            // Update results
+            document.getElementById('calcTime').textContent = baseTime;
+            document.getElementById('calcFee').textContent = baseFee.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('calcTotal').textContent = totalFee.toLocaleString('nb-NO') + ' kr';
+        }
+
+        // Export chart function
+        function exportChart(chartId) {
+            const canvas = document.getElementById(chartId);
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `${chartId}_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = url;
+            link.click();
+        }
+
+        // Share chart function (simplified)
+        function shareChart(chartId) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Byggesaksstatistikk',
+                    text: 'Se interessant statistikk om byggesaksprosessen i Norge',
+                    url: window.location.href
+                });
+            } else {
+                // Copy to clipboard fallback
+                navigator.clipboard.writeText(window.location.href);
+                alert('Lenke kopiert til utklippstavlen!');
+            }
+        }
+    </script>
+</body>
+</html>
