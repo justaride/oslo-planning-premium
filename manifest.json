@@ -1,0 +1,43 @@
+{
+    "name": "Byggesak Ultra - AI Building Permits",
+    "short_name": "Byggesak Ultra",
+    "description": "AI-powered building permit platform for Norway with advanced features",
+    "start_url": "/byggesak-ultra.html",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#0ea5e9",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["business", "productivity", "utilities"],
+    "shortcuts": [
+        {
+            "name": "New Application",
+            "short_name": "Apply",
+            "description": "Start a new building permit application",
+            "url": "/byggesak-ultra.html#wizard",
+            "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+        },
+        {
+            "name": "Check Status",
+            "short_name": "Status",
+            "description": "Check application status",
+            "url": "/byggesak-ultra.html#dashboard",
+            "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+        }
+    ],
+    "lang": "no",
+    "dir": "ltr"
+}
